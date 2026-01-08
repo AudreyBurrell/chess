@@ -1,0 +1,1 @@
+Here is the content that I wrote for notes.md, created as part of the GitHub assignment in CS 240.
