@@ -41,13 +41,11 @@ public class ChessBoard {
      * (How the game of chess normally starts)
      */
     public void resetBoard() {
-        //I wonder if I can just do this (if not, then will need to do a for loop:
-        board_squares = new ChessPiece[8][8];
-//        for (int i; i < board_squares.length; i++){
-//            for (int j; j < board_squares.length; j++){
-//                board_squares[i][j] = [0][0];
-//            }
-//        }
+        for (int i=0; i < board_squares.length; i++){
+            for (int j=0; j < board_squares.length; j++){
+                board_squares[i][j] = null;
+            }
+        }
 //        throw new RuntimeException("Not implemented");
     }
 }
