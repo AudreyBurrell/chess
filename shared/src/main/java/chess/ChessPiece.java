@@ -2,6 +2,7 @@ package chess;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.ArrayList;
 
 /**
  * Represents a single chess piece
@@ -53,8 +54,60 @@ public class ChessPiece {
      *
      * @return Collection of valid moves
      */
+    //KING
+    private Collection<ChessMove> kingMoves(ChessBoard board, ChessPosition myPosition){
+        List<ChessMove> king_moves = new ArrayList<>();
+        int current_row = myPosition.getRow();
+        int current_col = myPosition.getColumn();
+        int[][] directions = {
+                //1 square in any direciton, including diagonal
+                {current_row - 1, current_col - 1}, {current_row - 1, current_col}, {current_row - 1, current_col + 1},
+                {current_row, current_col - 1}, {current_row, current_col + 1},
+                {current_row + 1, current_col - 1}, {current_row + 1, current_col}, {current_row + 1, current_col + 1}
+        };
+        //determining which directions are actually valid
+        for (int[] square : directions) {
+            int new_row = square[0];
+            int new_col = square[1];
+            if (new_row < 1 || new_row > 8 || new_col < 1 || new_col > 8){
+                continue; //going to the next square
+            }
+            ChessPosition new_position = new ChessPosition(new_row, new_col);
+            ChessPiece target_piece = board.getPiece(new_position);
+            if (target_piece == null || target_piece.getTeamColor() != piece_color){
+                king_moves.add(new ChessMove(myPosition, new_position, null));
+            }
+        }
+        return king_moves;
+    }
+    //QUEEN
+
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
 //        throw new RuntimeException("Not implemented");
-        return List.of(); //just having this here so I can see which tests I am passing
+        List<ChessMove> chess_moves = new ArrayList<>();
+        PieceType current_piece = getPieceType();
+        switch(current_piece){
+            //if it's king, do something. If it's queen, do something else.
+            case KING:
+                chess_moves.addAll(kingMoves(board, myPosition)); //need to write a helper function
+                break;
+            case QUEEN:
+                //stuff goes here
+                break;
+            case BISHOP:
+                //stuff goes here
+                break;
+            case KNIGHT:
+                //stuff goes here
+                break;
+            case ROOK:
+                //stuff goes here
+                break;
+            case PAWN:
+                //stuff goes here
+                break;
+        }
+        return chess_moves;
+        //return List.of(); //just having this here so I can see which tests I am passing
     }
 }
