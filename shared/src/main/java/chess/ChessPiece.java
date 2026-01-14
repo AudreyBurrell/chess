@@ -200,9 +200,42 @@ public class ChessPiece {
         List<ChessMove> pawn_moves = new ArrayList<>();
         int current_row = myPosition.getRow();
         int current_col = myPosition.getColumn();
-        int[][] directions = {
-
-        };
+        //determine direction based off color
+        int forward;
+        if (piece_color == ChessGame.TeamColor.WHITE){
+            forward = 1;
+        } else {
+            forward = -1;
+        }
+        //determining if it's the piece's first move based on if it's currently in starting position
+        boolean first_move = (piece_color == ChessGame.TeamColor.WHITE && current_row == 2) ||
+                (piece_color == ChessGame.TeamColor.BLACK && current_row == 7);
+        //getting the options for ways to move
+        int[][] directions;
+        if (first_move){
+            directions = new int[][]{
+                    {2*forward, 0}, {forward, 0}, {forward, -1}, {forward, 1}
+            };
+        } else{
+            directions = new int[][]{
+                    {forward, 0}, {forward, -1}, {forward, 1}
+            };
+        }
+        //making sure they are valid and adding to list
+        for (int[] direction_test : directions) {
+            int suggested_row = direction_test[0];
+            int suggested_col = direction_test[1];
+            int new_row = suggested_row + current_row;
+            int new_col = suggested_col + current_col;
+            if (new_row < 1 || new_row > 8 || new_col < 1 || new_col > 8){
+                continue;
+            }
+            ChessPosition new_position = new ChessPosition(new_row, new_col);
+            ChessPiece target_piece = board.getPiece(new_position);
+            if (target_piece == null || target_piece.getTeamColor() != piece_color) {
+                pawn_moves.add(new ChessMove(myPosition, new_position, null));
+            }
+        }
         return pawn_moves;
     }
     //PUTTING IT TOGETHER
@@ -228,7 +261,7 @@ public class ChessPiece {
                 chess_moves.addAll(rookMoves(board, myPosition));
                 break;
             case PAWN:
-                //stuff goes here
+                chess_moves.addAll(pawnMoves(board, myPosition));
                 break;
         }
         return chess_moves;
