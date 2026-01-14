@@ -96,12 +96,40 @@ public class ChessGame {
     public boolean isInCheck(TeamColor teamColor) {
         boolean is_in_check = false;
         //throw new RuntimeException("Not implemented");
-        //if the king current position is in any move that the other team can make
-        //get the piece moves for the current team
-        List<ChessMove> all_moves = new ArrayList<>();
-        //getting all the moves NEED TO DO
-        //checking if king is there
-        //for each item in that list (to get the position), get a piece in that position. If it exists, check if it's king and the opposite  color, then set opposite color in check
+        ChessPosition king_location = null;
+        for(int row = 1; row <= 8; row++) {
+            for(int col=1; col<=8; col++){
+                ChessPosition piece_position = new ChessPosition(row, col);
+                ChessPiece piece = board.getPiece(piece_position);
+                if(piece.getPieceType() == ChessPiece.PieceType.KING) {
+                    if(piece.getTeamColor() == team_color){
+                        king_location = piece_position;
+                    }
+                }
+            }
+        }
+        //determining if that location is in check
+        ChessGame.TeamColor opponent_color;
+        if (teamColor == ChessGame.TeamColor.WHITE){
+            opponent_color = ChessGame.TeamColor.BLACK;
+        } else {
+            opponent_color = ChessGame.TeamColor.WHITE;
+        }
+        for (int row = 1; row <= 8; row++){
+            for (int col=1; col<=8; col++){
+                ChessPosition piece_position = new ChessPosition(row, col);
+                ChessPiece piece = board.getPiece(piece_position);
+                if (piece != null && piece.getTeamColor() == opponent_color) {
+                    Collection<ChessMove> opponent_moves = piece.pieceMoves(board, piece_position);
+                    for (ChessMove move : opponent_moves) {
+                        if (move.getEndPosition().equals(king_location)){
+                            is_in_check = true;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
         return is_in_check;
     }
 
@@ -133,6 +161,10 @@ public class ChessGame {
     public void setBoard() {
 //        throw new RuntimeException("Not implemented");
         //this.board = board;
+        this.board = new ChessBoard();
+        board.resetBoard();
+
+
     }
 
     /**
@@ -142,7 +174,7 @@ public class ChessGame {
      */
     public ChessBoard getBoard() {
 //        throw new RuntimeException("Not implemented");
-        return this.board;
+        return board;
     }
 
 

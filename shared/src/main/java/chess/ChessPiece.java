@@ -64,7 +64,8 @@ public class ChessPiece {
                 //1 square in any direction including diagonal
                 {1,-1},{1,0},{1,1},
                 {0,-1},{0,1},
-                {-1,-1},{0,-1},{-1,1}
+                {-1,-1},{-1,0},{-1,1}
+
         };
         for (int[] direction_test : directions) {
             int suggested_row = direction_test[0];
@@ -90,7 +91,7 @@ public class ChessPiece {
         int[][] directions = {
                 //move in straight lines and diagonals as far as there is open space
                 //can't hard code like king because it's not just one square
-                {1, 0}, {-1,0}, {0,1},{0,-1},{1,1}, {1,-1},{-1,1},{-1,1}
+                {1, 0}, {-1,0}, {0,1},{0,-1},{1,1}, {1,-1},{-1,1},{-1,-1}
         };
         for (int[] direction_test : directions) {
             int suggested_row = direction_test[0];
@@ -103,12 +104,13 @@ public class ChessPiece {
                 if (target_piece == null || target_piece.getTeamColor() != piece_color) {
                     queen_moves.add(new ChessMove(myPosition, new_position, null));
                     break;
-                } else {
+                }
+                else {
                     break;
                 }
+
             }
-            new_row += suggested_row;
-            new_col += suggested_col;
+
         }
 
         return queen_moves;
