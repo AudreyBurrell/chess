@@ -56,29 +56,6 @@ public class ChessPiece {
      */
     //KING
     private Collection<ChessMove> kingMoves(ChessBoard board, ChessPosition myPosition){
-//        List<ChessMove> king_moves = new ArrayList<>();
-//        int current_row = myPosition.getRow();
-//        int current_col = myPosition.getColumn();
-//        int[][] directions = {
-//                //1 square in any direciton, including diagonal
-//                {current_row - 1, current_col - 1}, {current_row - 1, current_col}, {current_row - 1, current_col + 1},
-//                {current_row, current_col - 1}, {current_row, current_col + 1},
-//                {current_row + 1, current_col - 1}, {current_row + 1, current_col}, {current_row + 1, current_col + 1}
-//        };
-//        //determining which directions are actually valid
-//        for (int[] square : directions) {
-//            int new_row = square[0];
-//            int new_col = square[1];
-//            if (new_row < 1 || new_row > 8 || new_col < 1 || new_col > 8){
-//                continue; //going to the next square
-//            }
-//            ChessPosition new_position = new ChessPosition(new_row, new_col);
-//            ChessPiece target_piece = board.getPiece(new_position);
-//            if (target_piece == null || target_piece.getTeamColor() != piece_color){
-//                king_moves.add(new ChessMove(myPosition, new_position, null));
-//            }
-//        }
-//        return king_moves;
         List<ChessMove> king_moves = new ArrayList<>();
         int current_row = myPosition.getRow();
         int current_col = myPosition.getColumn();
@@ -135,6 +112,99 @@ public class ChessPiece {
 
         return queen_moves;
     }
+    //BISHOP
+    private Collection<ChessMove> bishopMoves(ChessBoard board, ChessPosition myPosition){
+        List<ChessMove> bishop_moves = new ArrayList<>();
+        int current_row = myPosition.getRow();
+        int current_col = myPosition.getColumn();
+        int[][] directions = {
+                //move in diagonal lines as long as there is space
+               {1,-1},{1,1}, {-1,-1}, {-1,1}
+        };
+        for (int[] direction_test : directions){
+            int suggested_row = direction_test[0];
+            int suggested_col = direction_test[1];
+            int new_row = suggested_row + current_row;
+            int new_col = suggested_col + current_col;
+            while (new_row >= 1 && new_row <=8 && new_col >=1 && new_col <=8) {
+                ChessPosition new_position = new ChessPosition(new_row, new_col);
+                ChessPiece target_piece = board.getPiece(new_position);
+                if (target_piece == null || target_piece.getTeamColor() != piece_color) {
+                    bishop_moves.add(new ChessMove(myPosition, new_position, null));
+                    break;
+                } else {
+                    break;
+                }
+            }
+            new_row += suggested_row;
+            new_col += suggested_col;
+        }
+        return bishop_moves;
+    }
+    //KNIGHT
+    private Collection<ChessMove> knightMoves(ChessBoard board, ChessPosition myPosition) {
+        List<ChessMove> knight_moves = new ArrayList<>();
+        int current_row = myPosition.getRow();
+        int current_col = myPosition.getColumn();
+        int[][] directions = {
+                //moving 2 squares in one direction and 1 square in the other direction
+                {-2,1}, {-2,-1}, {2,1}, {2,-1}, {-1, -2}, {1, -2}, {-1,2}, {1,2}
+        };
+        for (int[] direction_test : directions) {
+            int suggested_row = direction_test[0];
+            int suggested_col = direction_test[1];
+            int new_row = suggested_row + current_row;
+            int new_col = suggested_col + current_col;
+            if (new_row < 1 || new_row > 8 || new_col < 1 || new_col > 8){
+                continue;
+            }
+            ChessPosition new_position = new ChessPosition(new_row, new_col);
+            ChessPiece target_piece = board.getPiece(new_position);
+            if (target_piece == null || target_piece.getTeamColor() != piece_color) {
+                knight_moves.add(new ChessMove(myPosition, new_position, null));
+            }
+        }
+        return knight_moves;
+    }
+    //ROOK
+    private Collection<ChessMove> rookMoves(ChessBoard board, ChessPosition myPosition) {
+        List<ChessMove> rook_moves = new ArrayList<>();
+        int current_row = myPosition.getRow();
+        int current_col = myPosition.getColumn();
+        int[][] directions = {
+                //straight lines (can be more than just one square
+                {1,0}, {0,1}, {-1,0}, {0,-1}
+        };
+        for (int[] direction_test : directions) {
+            int suggested_row = direction_test[0];
+            int suggested_col = direction_test[1];
+            int new_row = suggested_row + current_row;
+            int new_col = suggested_col + current_col;
+            while (new_row >= 1 && new_row <=8 && new_col >=1 && new_col <=8) {
+                ChessPosition new_position = new ChessPosition(new_row, new_col);
+                ChessPiece target_piece = board.getPiece(new_position);
+                if (target_piece == null || target_piece.getTeamColor() != piece_color) {
+                    rook_moves.add(new ChessMove(myPosition, new_position, null));
+                    break;
+                } else {
+                    break;
+                }
+            }
+            new_row += suggested_row;
+            new_col += suggested_col;
+        }
+        return rook_moves;
+    }
+    //PAWN
+    private Collection<ChessMove> pawnMoves(ChessBoard board, ChessPosition myPosition){
+        List<ChessMove> pawn_moves = new ArrayList<>();
+        int current_row = myPosition.getRow();
+        int current_col = myPosition.getColumn();
+        int[][] directions = {
+
+        };
+        return pawn_moves;
+    }
     //PUTTING IT TOGETHER
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
 //        throw new RuntimeException("Not implemented");
@@ -149,13 +219,13 @@ public class ChessPiece {
                 chess_moves.addAll(queenMoves(board, myPosition));
                 break;
             case BISHOP:
-                //stuff goes here
+                chess_moves.addAll(bishopMoves(board, myPosition));
                 break;
             case KNIGHT:
-                //stuff goes here
+                chess_moves.addAll(knightMoves(board, myPosition));
                 break;
             case ROOK:
-                //stuff goes here
+                chess_moves.addAll(rookMoves(board, myPosition));
                 break;
             case PAWN:
                 //stuff goes here
