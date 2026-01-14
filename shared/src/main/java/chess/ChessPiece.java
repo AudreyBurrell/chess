@@ -56,32 +56,86 @@ public class ChessPiece {
      */
     //KING
     private Collection<ChessMove> kingMoves(ChessBoard board, ChessPosition myPosition){
+//        List<ChessMove> king_moves = new ArrayList<>();
+//        int current_row = myPosition.getRow();
+//        int current_col = myPosition.getColumn();
+//        int[][] directions = {
+//                //1 square in any direciton, including diagonal
+//                {current_row - 1, current_col - 1}, {current_row - 1, current_col}, {current_row - 1, current_col + 1},
+//                {current_row, current_col - 1}, {current_row, current_col + 1},
+//                {current_row + 1, current_col - 1}, {current_row + 1, current_col}, {current_row + 1, current_col + 1}
+//        };
+//        //determining which directions are actually valid
+//        for (int[] square : directions) {
+//            int new_row = square[0];
+//            int new_col = square[1];
+//            if (new_row < 1 || new_row > 8 || new_col < 1 || new_col > 8){
+//                continue; //going to the next square
+//            }
+//            ChessPosition new_position = new ChessPosition(new_row, new_col);
+//            ChessPiece target_piece = board.getPiece(new_position);
+//            if (target_piece == null || target_piece.getTeamColor() != piece_color){
+//                king_moves.add(new ChessMove(myPosition, new_position, null));
+//            }
+//        }
+//        return king_moves;
         List<ChessMove> king_moves = new ArrayList<>();
         int current_row = myPosition.getRow();
         int current_col = myPosition.getColumn();
         int[][] directions = {
-                //1 square in any direciton, including diagonal
-                {current_row - 1, current_col - 1}, {current_row - 1, current_col}, {current_row - 1, current_col + 1},
-                {current_row, current_col - 1}, {current_row, current_col + 1},
-                {current_row + 1, current_col - 1}, {current_row + 1, current_col}, {current_row + 1, current_col + 1}
+                //1 square in any direction including diagonal
+                {1,-1},{1,0},{1,1},
+                {0,-1},{0,1},
+                {-1,-1},{0,-1},{-1,1}
         };
-        //determining which directions are actually valid
-        for (int[] square : directions) {
-            int new_row = square[0];
-            int new_col = square[1];
+        for (int[] direction_test : directions) {
+            int suggested_row = direction_test[0];
+            int suggested_col = direction_test[1];
+            int new_row = suggested_row + current_row;
+            int new_col = suggested_col + current_col;
             if (new_row < 1 || new_row > 8 || new_col < 1 || new_col > 8){
-                continue; //going to the next square
+                continue;
             }
             ChessPosition new_position = new ChessPosition(new_row, new_col);
             ChessPiece target_piece = board.getPiece(new_position);
-            if (target_piece == null || target_piece.getTeamColor() != piece_color){
+            if (target_piece == null || target_piece.getTeamColor() != piece_color) {
                 king_moves.add(new ChessMove(myPosition, new_position, null));
             }
         }
         return king_moves;
     }
     //QUEEN
+    private Collection<ChessMove> queenMoves(ChessBoard board, ChessPosition myPosition){
+        List<ChessMove> queen_moves = new ArrayList<>();
+        int current_row = myPosition.getRow();
+        int current_col = myPosition.getColumn();
+        int[][] directions = {
+                //move in straight lines and diagonals as far as there is open space
+                //can't hard code like king because it's not just one square
+                {1, 0}, {-1,0}, {0,1},{0,-1},{1,1}, {1,-1},{-1,1},{-1,1}
+        };
+        for (int[] direction_test : directions) {
+            int suggested_row = direction_test[0];
+            int suggested_col = direction_test[1];
+            int new_row = suggested_row + current_row;
+            int new_col = suggested_col + current_col;
+            while (new_row >= 1 && new_row <=8 && new_col >=1 && new_col <=8){
+                ChessPosition new_position = new ChessPosition(new_row, new_col);
+                ChessPiece target_piece = board.getPiece(new_position);
+                if (target_piece == null || target_piece.getTeamColor() != piece_color) {
+                    queen_moves.add(new ChessMove(myPosition, new_position, null));
+                    break;
+                } else {
+                    break;
+                }
+            }
+            new_row += suggested_row;
+            new_col += suggested_col;
+        }
 
+        return queen_moves;
+    }
+    //PUTTING IT TOGETHER
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
 //        throw new RuntimeException("Not implemented");
         List<ChessMove> chess_moves = new ArrayList<>();
@@ -89,10 +143,10 @@ public class ChessPiece {
         switch(current_piece){
             //if it's king, do something. If it's queen, do something else.
             case KING:
-                chess_moves.addAll(kingMoves(board, myPosition)); //need to write a helper function
+                chess_moves.addAll(kingMoves(board, myPosition));
                 break;
             case QUEEN:
-                //stuff goes here
+                chess_moves.addAll(queenMoves(board, myPosition));
                 break;
             case BISHOP:
                 //stuff goes here
