@@ -1,6 +1,8 @@
 package chess;
 
 import java.util.Collection;
+import java.util.List;
+import java.util.ArrayList;
 
 /**
  * For a class that can manage a chess game, making moves on a board
@@ -91,7 +93,15 @@ public class ChessGame {
      * @return True if the specified team is in check
      */
     public boolean isInCheck(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        boolean is_in_check = false;
+        //throw new RuntimeException("Not implemented");
+        //if the king current position is in any move that the other team can make
+        //get the piece moves for the current team
+        List<ChessMove> all_moves = new ArrayList<>();
+        //getting all the moves NEED TO DO
+        //checking if king is there
+        //for each item in that list (to get the position), get a piece in that position. If it exists, check if it's king and the opposite  color, then set opposite color in check
+        return is_in_check;
     }
 
     /**
@@ -121,7 +131,7 @@ public class ChessGame {
      */
     public void setBoard() {
 //        throw new RuntimeException("Not implemented");
-        this.board = board;
+        //this.board = board;
     }
 
     /**

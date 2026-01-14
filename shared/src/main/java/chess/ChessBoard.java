@@ -1,5 +1,10 @@
 package chess;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
+
 /**
  * A chessboard that can hold and rearrange chess pieces.
  * <p>
@@ -7,8 +12,7 @@ package chess;
  * signature of the existing methods.
  */
 public class ChessBoard {
-    ChessPiece[][] board_squares = new ChessPiece[8][8];
-
+    ChessPiece[][] board = new ChessPiece[8][8];
     public ChessBoard() {
 //        resetBoard();
     }
@@ -21,7 +25,7 @@ public class ChessBoard {
      */
     public void addPiece(ChessPosition position, ChessPiece piece) {
 //       throw new RuntimeException("Not implemented");
-        board_squares[position.getRow()-1][position.getColumn()-1] = piece;
+        board[position.getRow()-1][position.getColumn()-1] = piece;
     }
 
     /**
@@ -33,7 +37,7 @@ public class ChessBoard {
      */
     public ChessPiece getPiece(ChessPosition position) {
 //        throw new RuntimeException("Not implemented");
-        return board_squares[position.getRow()-1][position.getColumn()-1];
+        return board[position.getRow()-1][position.getColumn()-1];
     }
 
     /**
@@ -41,11 +45,21 @@ public class ChessBoard {
      * (How the game of chess normally starts)
      */
     public void resetBoard() {
-        for (int i=0; i < board_squares.length; i++){
-            for (int j=0; j < board_squares.length; j++){
-                board_squares[i][j] = null;
-            }
-        }
+        //[p][p][p][p][p][p][p][p]
+        //[r][n][b][q][k][b][n][r] (using n for knight, k for king)
+        //Actually I think I need to put the picees where they are supposed to go
+        ChessPiece[][] board = new ChessPiece[8][8];
+        //for each team, I will just put in the pieces and set the color
+        //white
+
+        //black
+
+        //actually, maybe I could put the pieces in first and then set the color
+
+
+
 //        throw new RuntimeException("Not implemented");
     }
+
+
 }

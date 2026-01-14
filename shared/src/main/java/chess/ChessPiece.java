@@ -3,6 +3,7 @@ package chess;
 import java.util.Collection;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Objects;
 
 /**
  * Represents a single chess piece
@@ -266,5 +267,19 @@ public class ChessPiece {
         }
         return chess_moves;
         //return List.of(); //just having this here so I can see which tests I am passing
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        ChessPiece that = (ChessPiece) o;
+        return piece_color == that.piece_color && piece_type == that.piece_type;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(piece_color, piece_type);
     }
 }
