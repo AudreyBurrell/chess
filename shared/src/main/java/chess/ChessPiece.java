@@ -91,7 +91,9 @@ public class ChessPiece {
         int[][] directions = {
                 //move in straight lines and diagonals as far as there is open space
                 //can't hard code like king because it's not just one square
-                {1, 0}, {-1,0}, {0,1},{0,-1},{1,1}, {1,-1},{-1,1},{-1,-1}
+                {1,-1},{1,0},{1,1},
+                {0,-1},{0,1},
+                {-1,-1},{-1,0},{-1,1}
         };
         for (int[] direction_test : directions) {
             int suggested_row = direction_test[0];
@@ -101,14 +103,16 @@ public class ChessPiece {
             while (new_row >= 1 && new_row <=8 && new_col >=1 && new_col <=8){
                 ChessPosition new_position = new ChessPosition(new_row, new_col);
                 ChessPiece target_piece = board.getPiece(new_position);
-                if (target_piece == null || target_piece.getTeamColor() != piece_color) {
+                if (target_piece == null) {
+                    queen_moves.add(new ChessMove(myPosition, new_position, null));
+                } else if (target_piece.getTeamColor() != piece_color) {
                     queen_moves.add(new ChessMove(myPosition, new_position, null));
                     break;
-                }
-                else {
+                } else {
                     break;
                 }
-
+                new_row += suggested_row;
+                new_col += suggested_col;
             }
 
         }
@@ -132,15 +136,17 @@ public class ChessPiece {
             while (new_row >= 1 && new_row <=8 && new_col >=1 && new_col <=8) {
                 ChessPosition new_position = new ChessPosition(new_row, new_col);
                 ChessPiece target_piece = board.getPiece(new_position);
-                if (target_piece == null || target_piece.getTeamColor() != piece_color) {
+                if (target_piece == null) {
                     bishop_moves.add(new ChessMove(myPosition, new_position, null));
-                    break;
+                } else if (target_piece.getTeamColor() != piece_color) {
+                    bishop_moves.add(new ChessMove(myPosition, new_position, null));
                 } else {
                     break;
                 }
+                new_row += suggested_row;
+                new_col += suggested_col;
             }
-            new_row += suggested_row;
-            new_col += suggested_col;
+
         }
         return bishop_moves;
     }
@@ -186,15 +192,23 @@ public class ChessPiece {
             while (new_row >= 1 && new_row <=8 && new_col >=1 && new_col <=8) {
                 ChessPosition new_position = new ChessPosition(new_row, new_col);
                 ChessPiece target_piece = board.getPiece(new_position);
-                if (target_piece == null || target_piece.getTeamColor() != piece_color) {
+//                if (target_piece == null || target_piece.getTeamColor() != piece_color) {
+//                    rook_moves.add(new ChessMove(myPosition, new_position, null));
+//                } else {
+//                    break;
+//                }
+                if (target_piece == null) {
+                    rook_moves.add(new ChessMove(myPosition, new_position, null));
+                } else if (target_piece.getTeamColor() != piece_color) {
                     rook_moves.add(new ChessMove(myPosition, new_position, null));
                     break;
                 } else {
                     break;
                 }
+                new_row += suggested_row;
+                new_col += suggested_col;
             }
-            new_row += suggested_row;
-            new_col += suggested_col;
+
         }
         return rook_moves;
     }

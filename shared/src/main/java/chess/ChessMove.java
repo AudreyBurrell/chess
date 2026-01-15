@@ -47,5 +47,17 @@ public class ChessMove {
         return promotion_piece;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        ChessMove chessMove = (ChessMove) o;
+        return Objects.equals(start_position, chessMove.start_position) && Objects.equals(end_position, chessMove.end_position) && promotion_piece == chessMove.promotion_piece;
+    }
 
+    @Override
+    public int hashCode() {
+        return Objects.hash(start_position, end_position, promotion_piece);
+    }
 }
