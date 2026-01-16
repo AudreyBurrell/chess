@@ -126,7 +126,7 @@ public class ChessPiece {
         int current_col = myPosition.getColumn();
         int[][] directions = {
                 //move in diagonal lines as long as there is space
-               {1,-1},{1,1}, {-1,-1}, {-1,1}
+               {1,-1},{1,1},{-1,-1},{-1,1}
         };
         for (int[] direction_test : directions){
             int suggested_row = direction_test[0];
@@ -140,6 +140,7 @@ public class ChessPiece {
                     bishop_moves.add(new ChessMove(myPosition, new_position, null));
                 } else if (target_piece.getTeamColor() != piece_color) {
                     bishop_moves.add(new ChessMove(myPosition, new_position, null));
+                    break;
                 } else {
                     break;
                 }
@@ -214,6 +215,7 @@ public class ChessPiece {
     }
     //PAWN
     private Collection<ChessMove> pawnMoves(ChessBoard board, ChessPosition myPosition){
+        //need to add promotion stuff somewhere
         List<ChessMove> pawn_moves = new ArrayList<>();
         int current_row = myPosition.getRow();
         int current_col = myPosition.getColumn();
@@ -224,35 +226,76 @@ public class ChessPiece {
         } else {
             forward = -1;
         }
-        //determining if it's the piece's first move based on if it's currently in starting position
-        boolean first_move = (piece_color == ChessGame.TeamColor.WHITE && current_row == 2) ||
-                (piece_color == ChessGame.TeamColor.BLACK && current_row == 7);
-        //getting the options for ways to move
-        int[][] directions;
-        if (first_move){
-            directions = new int[][]{
-                    {2*forward, 0}, {forward, 0}, {forward, -1}, {forward, 1}
-            };
-        } else{
-            directions = new int[][]{
-                    {forward, 0}, {forward, -1}, {forward, 1}
-            };
-        }
-        //making sure they are valid and adding to list
-        for (int[] direction_test : directions) {
-            int suggested_row = direction_test[0];
-            int suggested_col = direction_test[1];
-            int new_row = suggested_row + current_row;
-            int new_col = suggested_col + current_col;
-            if (new_row < 1 || new_row > 8 || new_col < 1 || new_col > 8){
-                continue;
+        boolean first_move = (piece_color == ChessGame.TeamColor.WHITE && current_row == 2) || (piece_color == ChessGame.TeamColor.BLACK && current_row == 7);
+        int one_forward = current_row + forward;
+        if (one_forward >= 1 && one_forward <= 8) {
+            ChessPosition one_forward_position = new ChessPosition(one_forward, current_col);
+            ChessPosition two_forward_position_white = new ChessPosition(one_forward+1, current_col);
+            ChessPosition two_forward_position_black = new ChessPosition(one_forward - 1, current_col);
+            ChessPiece piece_ahead = board.getPiece(one_forward_position);
+            if (piece_ahead == null){
+                //check for promotion
+                if (piece_color == ChessGame.TeamColor.WHITE) {
+                    if (one_forward_position.getRow() == 8) {
+                        //promote
+                        pawn_moves.add(new ChessMove(myPosition, one_forward_position, ChessPiece.PieceType.QUEEN));
+                        pawn_moves.add(new ChessMove(myPosition, one_forward_position, ChessPiece.PieceType.ROOK));
+                        pawn_moves.add(new ChessMove(myPosition, one_forward_position, ChessPiece.PieceType.BISHOP));
+                        pawn_moves.add(new ChessMove(myPosition, one_forward_position, ChessPiece.PieceType.KNIGHT));
+                    } else {
+                        //don't promote
+                        pawn_moves.add(new ChessMove(myPosition, one_forward_position, null));
+                    }
+                    //Chceking if first move and adding the two forward option
+                    if (first_move) {
+                        if (board.getPiece(two_forward_position_white) == null && board.getPiece(one_forward_position) == null) {
+                            pawn_moves.add(new ChessMove(myPosition, two_forward_position_white, null));
+                        }
+                    }
+                }
+                if (piece_color == ChessGame.TeamColor.BLACK) {
+                    if(one_forward_position.getRow() == 1) {
+                        pawn_moves.add(new ChessMove(myPosition, one_forward_position, ChessPiece.PieceType.QUEEN));
+                        pawn_moves.add(new ChessMove(myPosition, one_forward_position, ChessPiece.PieceType.ROOK));
+                        pawn_moves.add(new ChessMove(myPosition, one_forward_position, ChessPiece.PieceType.BISHOP));
+                        pawn_moves.add(new ChessMove(myPosition, one_forward_position, ChessPiece.PieceType.KNIGHT));
+                    } else {
+                        pawn_moves.add(new ChessMove(myPosition, one_forward_position, null));
+                    }
+                    if(first_move){
+                        if(board.getPiece(two_forward_position_black) == null && board.getPiece(one_forward_position) == null) {
+                            pawn_moves.add(new ChessMove(myPosition, two_forward_position_black, null));
+                        }
+                    }
+                }
             }
-            ChessPosition new_position = new ChessPosition(new_row, new_col);
-            ChessPiece target_piece = board.getPiece(new_position);
-            if (target_piece == null || target_piece.getTeamColor() != piece_color) {
-                pawn_moves.add(new ChessMove(myPosition, new_position, null));
+            //step 3: diagonal captures
+            int[][] directions = {
+                    {-1,1},{1,-1},{1,1},{-1,-1}
+            };
+            for(int[] direction_test : directions) {
+                int suggested_row = direction_test[0];
+                int suggested_col = direction_test[1];
+                int new_row = current_row + suggested_row;
+                int new_col = current_col + suggested_col;
+                if (new_row >= 1 && new_row <= 8 && new_col >= 1 && new_col <= 8){
+                    ChessPosition new_position = new ChessPosition(new_row, new_col);
+                    ChessPiece target_piece = board.getPiece(new_position);
+                    if (target_piece != null && target_piece.getTeamColor() != piece_color) {
+                        if((piece_color == ChessGame.TeamColor.WHITE && new_row == 8) || (piece_color == ChessGame.TeamColor.BLACK && new_row == 1)) {
+                            pawn_moves.add(new ChessMove(myPosition, new_position, ChessPiece.PieceType.QUEEN));
+                            pawn_moves.add(new ChessMove(myPosition, new_position, ChessPiece.PieceType.ROOK));
+                            pawn_moves.add(new ChessMove(myPosition, new_position, ChessPiece.PieceType.BISHOP));
+                            pawn_moves.add(new ChessMove(myPosition, new_position, ChessPiece.PieceType.KNIGHT));
+                        } else {
+                            pawn_moves.add(new ChessMove(myPosition, new_position, null));
+                        }
+                    }
+                }
             }
+
         }
+
         return pawn_moves;
     }
     //PUTTING IT TOGETHER
