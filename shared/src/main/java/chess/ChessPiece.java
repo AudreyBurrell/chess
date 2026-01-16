@@ -270,14 +270,26 @@ public class ChessPiece {
                 }
             }
             //step 3: diagonal captures
-            int[][] directions = {
-                    {-1,1},{1,-1},{1,1},{-1,-1}
-            };
+            int[][] directions;
+            if (piece_color == ChessGame.TeamColor.WHITE) {
+                directions = new int[][] {
+                        {1,-1}, {1,1}
+                };
+            } else {
+                directions = new int[][] {
+                        {-1,-1}, {-1,1}
+                };
+            }
             for(int[] direction_test : directions) {
                 int suggested_row = direction_test[0];
                 int suggested_col = direction_test[1];
                 int new_row = current_row + suggested_row;
                 int new_col = current_col + suggested_col;
+                //checking for backwards (if the new row is -1 from current row and the piece is white
+                //if the new row is + 1 from current row and the piece is black
+//                if (new_row < current_row) {
+//                    continue;
+//                }
                 if (new_row >= 1 && new_row <= 8 && new_col >= 1 && new_col <= 8){
                     ChessPosition new_position = new ChessPosition(new_row, new_col);
                     ChessPiece target_piece = board.getPiece(new_position);
