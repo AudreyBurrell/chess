@@ -229,7 +229,7 @@ public class ChessPiece {
         boolean first_move = (piece_color == ChessGame.TeamColor.WHITE && current_row == 2) || (piece_color == ChessGame.TeamColor.BLACK && current_row == 7);
         int one_forward = current_row + forward;
         if (one_forward >= 1 && one_forward <= 8) {
-            ChessPosition one_forward_position = new ChessPosition(one_forward, current_col);
+            ChessPosition one_forward_position = new ChessPosition(current_row + forward, current_col);
             ChessPosition two_forward_position_white = new ChessPosition(one_forward+1, current_col);
             ChessPosition two_forward_position_black = new ChessPosition(one_forward - 1, current_col);
             ChessPiece piece_ahead = board.getPiece(one_forward_position);
