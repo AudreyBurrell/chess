@@ -138,7 +138,27 @@ public class ChessGame {
      * @return True if the specified team is in stalemate, otherwise false
      */
     public boolean isInStalemate(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+//        throw new RuntimeException("Not implemented");
+        if(isInCheck(teamColor)) {
+            return false;
+        }
+        //Collection<ChessMove> possible_moves;
+        List<ChessMove> possible_moves = new ArrayList<>();
+        //go through each square, see if there is a piece and it's the same color, add moves to possible_moves
+        for(int row = 1; row <= 8; row++) {
+            for(int col = 1; col <= 8; col++) {
+                ChessPosition testing_position = new ChessPosition(row, col);
+                ChessPiece testing_piece = board.getPiece(testing_position);
+                if(testing_piece != null && testing_piece.getTeamColor() == teamColor) {
+                    possible_moves.addAll(testing_piece.pieceMoves(board, testing_position));
+                }
+            }
+        }
+        if(possible_moves.isEmpty()) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     /**
