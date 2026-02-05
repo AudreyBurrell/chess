@@ -169,7 +169,7 @@ public class ChessGame {
                 ChessPosition testing_position = new ChessPosition(row, col);
                 ChessPiece testing_piece = board.getPiece(testing_position);
                 if(testing_piece != null && testing_piece.getTeamColor() == teamColor){
-                    Collection<ChessMove> possible_moves = testing_piece.pieceMoves(board, testing_position);
+                    Collection<ChessMove> possible_moves = validMoves(testing_position);
                     if(!possible_moves.isEmpty()) {
                         return false;
                     }
@@ -203,7 +203,10 @@ public class ChessGame {
                     if(testing_piece.getPieceType() == ChessPiece.PieceType.KING) {
                         king_position = testing_position;
                     }
-                    possible_moves.addAll(testing_piece.pieceMoves(board, testing_position));
+                    Collection<ChessMove> moves = validMoves(testing_position);
+                    if(!moves.isEmpty()) {
+                        return false;
+                    }
                 }
             }
         }
@@ -218,12 +221,18 @@ public class ChessGame {
                 }
             }
         }
+        //checking to see if the king is pinned
+        Collection<ChessMove> king_moves = validMoves(king_position);
+        if(king_moves.isEmpty()) {
+            return true;
+        }
         //if king is not in immediate danger, then check to see if there are any moves
         if(possible_moves.isEmpty() && !opponent_moves.contains(king_position)) {
             return true;
         } else {
             return false;
         }
+
     }
 
     /**
