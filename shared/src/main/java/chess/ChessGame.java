@@ -96,8 +96,8 @@ public class ChessGame {
         if(currentPiece.getTeamColor() != getTeamTurn()) {
             throw new InvalidMoveException("Piece color does not equal piece turn");
         }
-        Collection<ChessMove> valid_moves = validMoves(move.getStartPosition());
-        if(!valid_moves.contains(move)) {
+        Collection<ChessMove> validMoves = validMoves(move.getStartPosition());
+        if(!validMoves.contains(move)) {
             throw new InvalidMoveException("Move not valid");
         }
         ChessPiece pieceToPlace;
@@ -141,8 +141,8 @@ public class ChessGame {
                 ChessPosition testingPosition = new ChessPosition(row, col);
                 ChessPiece testingPiece = board.getPiece(testingPosition);
                 if(testingPiece != null && testingPiece.getTeamColor() != teamColor) {
-                    Collection<ChessMove> opponent_moves = testingPiece.pieceMoves(board, testingPosition);
-                    for(ChessMove move : opponent_moves) {
+                    Collection<ChessMove> opponentMoves = testingPiece.pieceMoves(board, testingPosition);
+                    for(ChessMove move : opponentMoves) {
                         if(move.getEndPosition().equals(kingPosition)) {
                             return true;
                         }
@@ -222,8 +222,8 @@ public class ChessGame {
             }
         }
         //checking to see if the king is pinned
-        Collection<ChessMove> king_moves = validMoves(kingPosition);
-        if(king_moves.isEmpty()) {
+        Collection<ChessMove> kingMoves = validMoves(kingPosition);
+        if(kingMoves.isEmpty()) {
             return true;
         }
         //if king is not in immediate danger, then check to see if there are any moves
