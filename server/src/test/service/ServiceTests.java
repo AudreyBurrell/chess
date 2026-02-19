@@ -15,7 +15,7 @@ public class ServiceTests {
     public void setUp() {
         dataAccess = new MemoryDataAccess();
     }
-
+    //register
     @Test
     public void createUserPositive() throws DataAccessException {
         UserData user = new UserData("testUser", "password", "test@email.com");
@@ -33,4 +33,40 @@ public class ServiceTests {
                 () -> dataAccess.createUser(user2)
         );
     }
+    //login test ideas
+    //positive test: user gets in
+    @Test
+    public void loginUserPositive() throws DataAccessException {
+        //adding data to the dataAccess
+        UserData user = new UserData("testUser", "password", "test@email.com");
+        dataAccess.createUser(user);
+        //I want to use an assert true to make sure it is in the dataAccess
+        UserData result = dataAccess.loginUser(user);
+        assertTrue(result != null);
+        assertEquals("testUser", result.username());
+    }
+    //negative test: username doesn't match
+    @Test
+    public void loginUserNoMatch() throws DataAccessException {
+        UserData user = new UserData("testUser", "password", "test@email.com");
+        dataAccess.createUser(user);
+        UserData username = new UserData("testuser", "password", "test@email.com");
+        assertThrows (
+                DataAccessException.class,
+                () -> dataAccess.loginUser(username)
+        );
+    }
+    //testing auth data stuff
+
+
+    //logout
+
+    //list game tests
+
+    //create game tests
+
+    //join game tests
+
+    //clear tests
+
 }

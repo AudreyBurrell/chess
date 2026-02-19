@@ -30,4 +30,19 @@ public class MemoryDataAccess implements DataAccess {
         authDataMap.put(username, authData);
         return authData;
     }
+
+    @Override
+    public UserData loginUser(UserData user) throws DataAccessException {
+        if(getUser(user.username()) != null) {
+            return user;
+        } else {
+            throw new DataAccessException("Username required");
+        }
+    }
+    //I need to write something to get the authData
+
+    @Override
+    public AuthData getAuth(String username) throws DataAccessException {
+        return authDataMap.get(username);
+    }
 }
