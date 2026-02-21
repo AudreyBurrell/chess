@@ -3,10 +3,14 @@ package service;
 import dataaccess.MemoryDataAccess;
 import model.UserData;
 import model.AuthData;
+import model.GameData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import dataaccess.DataAccessException;
 import model.UserData;
+
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 public class ServiceTests {
@@ -79,14 +83,75 @@ public class ServiceTests {
         dataAccess.deleteAuth(auth.authToken());
         assertNull(dataAccess.getAuth(auth.authToken()));
     }
-
-
     //list game tests
-
+    @Test
+    public void listGamesTest() throws DataAccessException {
+        GameData game1 = new GameData(1, null, null, "testGame", null);
+        GameData game2 = new GameData(2, null, null, "testGame2", null);
+        GameData game3 = new GameData(3, null, null, "testGame3", null);
+        int gameID1 = dataAccess.createGame(game1);
+        int gameID2 = dataAccess.createGame(game2);
+        int gameID3 = dataAccess.createGame(game3);
+        List<GameData> gamesList = dataAccess.listGames();
+        assertNotNull(gamesList);
+        assertEquals(3, gamesList.size());
+        assertEquals("testGame", gamesList.get(0).gameName());
+        assertEquals("testGame2", gamesList.get(1).gameName());
+        assertEquals("testGame3", gamesList.get(2).gameName());
+    }
     //create game tests
-
-    //join game tests
-
+    @Test
+    public void createGameTest() throws DataAccessException {
+        GameData testingGame = new GameData(1, null, null, "testGame", null);
+        int gameID = dataAccess.createGame(testingGame);
+        assertTrue(gameID > 0);
+    }
+    //get game test
+    @Test
+    public void getGameTest() throws DataAccessException {
+        GameData testingGame = new GameData(1, null, null, "testGame", null);
+        int gameID = dataAccess.createGame(testingGame);
+        GameData retrievedGame = dataAccess.getGame(testingGame.gameID());
+        assertNotNull(retrievedGame);
+        assertEquals(testingGame.gameName(), retrievedGame.gameName());
+    }
+    //update game tests
+    @Test
+    public void updateGameTest() throws DataAccessException {
+        GameData originalGame = new GameData(1, null, null, "testGame", null);
+        int gameID = dataAccess.createGame(originalGame);
+        GameData updatedGame = new GameData(1, "testUser", null, "testGame", null);
+        int gameID2 = dataAccess.createGame(updatedGame);
+        assertEquals(gameID, gameID2);
+        assertEquals("testUser",updatedGame.whiteUsername());
+    }
     //clear tests
+    @Test
+    public void clearUsersTest() throws DataAccessException {
+        UserData user = new UserData("testUser", "password", "test@email.com");
+        dataAccess.createUser(user);
+        UserData user2 = new UserData("testUser2", "password2", "test2@email.com");
+        dataAccess.createUser(user2);
+        dataAccess.clearEverything();
+        assertNull(dataAccess.getUser("testUser"));
+        assertNull(dataAccess.getUser("testUser2"));
+    }
+    @Test
+    public void clearAuthTest() throws DataAccessException {
+        AuthData auth = dataAccess.createAuth("testUser");
+        AuthData auth2 = dataAccess.createAuth("testUser2");
+        dataAccess.clearEverything();
+        assertNull(dataAccess.getAuth(auth.authToken()));
+        assertNull(dataAccess.getAuth(auth2.authToken()));
+    }
+    @Test
+    public void clearGamesTest() throws DataAccessException {
+        GameData game1 = new GameData(1, null, null, "testGame", null);
+        int gameID = dataAccess.createGame(game1);
+        GameData game2 = new GameData(2, null, null, "testGame2", null);
+        int gameID2 = dataAccess.createGame(game2);
+        dataAccess.clearEverything();
+        assertEquals(0, dataAccess.listGames().size());
+    }
 
 }
