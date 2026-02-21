@@ -27,22 +27,26 @@ public class MemoryDataAccess implements DataAccess {
     public AuthData createAuth(String username) throws DataAccessException {
         String randomAuth = UUID.randomUUID().toString();
         AuthData authData = new AuthData(randomAuth, username);
-        authDataMap.put(username, authData);
+        authDataMap.put(randomAuth, authData);
         return authData;
     }
 
-    @Override
-    public UserData loginUser(UserData user) throws DataAccessException {
-        if(getUser(user.username()) != null) {
-            return user;
-        } else {
-            throw new DataAccessException("Username required");
-        }
-    }
-    //I need to write something to get the authData
+//    @Override
+//    public UserData loginUser(UserData user) throws DataAccessException {
+//        if(getUser(user.username()) != null) {
+//            return user;
+//        } else {
+//            throw new DataAccessException("Username required");
+//        }
+//    }
 
     @Override
-    public AuthData getAuth(String username) throws DataAccessException {
-        return authDataMap.get(username);
+    public AuthData getAuth(String authToken) throws DataAccessException {
+        return authDataMap.get(authToken);
+    }
+
+    @Override
+    public void deleteAuth(String authToken) throws DataAccessException {
+        authDataMap.remove(authToken);
     }
 }

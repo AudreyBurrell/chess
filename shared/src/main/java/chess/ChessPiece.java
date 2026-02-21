@@ -218,6 +218,7 @@ public class ChessPiece {
         promotionMoves.add(new ChessMove(startPosition, endPosition, ChessPiece.PieceType.KNIGHT));
         return promotionMoves;
     }
+
     private Collection<ChessMove> pawnMoves(ChessBoard board, ChessPosition myPosition){
         //need to add promotion stuff somewhere
         List<ChessMove> pawnMoves = new ArrayList<>();
