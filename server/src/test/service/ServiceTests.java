@@ -15,11 +15,13 @@ import static org.junit.jupiter.api.Assertions.*;
 public class ServiceTests {
     private MemoryDataAccess dataAccess;
     private UserService userService;
+    private GameService gameService;
 
     @BeforeEach
     public void setUp() {
         dataAccess = new MemoryDataAccess();
         userService = new UserService(dataAccess);
+        gameService = new GameService(dataAccess);
     }
     //register
     @Test
@@ -119,12 +121,12 @@ public class ServiceTests {
     //update game tests
     @Test
     public void updateGameTest() throws DataAccessException {
-        GameData originalGame = new GameData(1, null, null, "testGame", null);
+        GameData originalGame = new GameData(0, null, null, "testGame", null);
         int gameID = dataAccess.createGame(originalGame);
-        GameData updatedGame = new GameData(1, "testUser", null, "testGame", null);
-        int gameID2 = dataAccess.createGame(updatedGame);
-        assertEquals(gameID, gameID2);
-        assertEquals("testUser",updatedGame.whiteUsername());
+        GameData updatedGame = new GameData(gameID, "testUser", null, "testGame", null);
+        dataAccess.updateGame(updatedGame);
+        GameData retrieved = dataAccess.getGame(gameID);
+        assertEquals("testUser", retrieved.whiteUsername());
     }
     //clear tests
     @Test
@@ -181,6 +183,55 @@ public class ServiceTests {
         AuthData auth = userService.register(data);
         userService.logout(auth.authToken());
         assertNull(dataAccess.getAuth(auth.authToken()));
+    }
+    //GAME SERVICE TESTS
+    //create game
+    @Test
+    public void createGameServiceTest() throws DataAccessException {
+        UserData userData = new UserData("testUser", "testUser", "testUser@email.com");
+        AuthData auth = userService.register(userData);
+        int gameID = gameService.createGame(auth.authToken(), "testGame");
+        assertEquals(1, gameID);
+    }
+    //list game
+    @Test
+    public void listGameServiceTest() throws DataAccessException {
+        GameData game1 = new GameData(1, null, null, "testGame", null);
+        GameData game2 = new GameData(2, null, null, "testGame2", null);
+        GameData game3 = new GameData(3, null, null, "testGame3", null);
+        int gameID1 = dataAccess.createGame(game1);
+        int gameID2 = dataAccess.createGame(game2);
+        int gameID3 = dataAccess.createGame(game3);
+        UserData data = new UserData("testUser", "testUser", "testUser@email.com");
+        AuthData auth = userService.register(data);
+        List<GameData> gamesList = gameService.listGames(auth.authToken());
+        assertNotNull(gamesList);
+        assertEquals(3, gamesList.size());
+    }
+    //join game
+    @Test
+    public void joinGameWhiteTestPositive() throws DataAccessException {
+        UserData user = new UserData("testUser", "testUser", "testUser@email.com");
+        AuthData auth = userService.register(user);
+        int gameID = gameService.createGame(auth.authToken(), "testGame");
+        gameService.joinGame(auth.authToken(),gameID,"WHITE");
+        GameData game = dataAccess.getGame(gameID);
+        assertEquals("testUser", game.whiteUsername());
+    }
+
+    @Test
+    public void joinGameWhiteTestNegative() throws DataAccessException {
+        //white username is already taken
+        UserData user1 = new UserData("testUser1", "testUser1", "testUser1@email.com");
+        AuthData auth1 = userService.register(user1);
+        int gameID = gameService.createGame(auth1.authToken(), "testGame");
+        gameService.joinGame(auth1.authToken(), gameID, "WHITE");
+        UserData user2 = new UserData("testUser2", "testUser2", "testUser2@email.com");
+        AuthData auth2 = userService.register(user2);
+        assertThrows (
+                DataAccessException.class,
+                () -> gameService.joinGame(auth2.authToken(), gameID, "WHITE")
+        );
     }
 
 }
