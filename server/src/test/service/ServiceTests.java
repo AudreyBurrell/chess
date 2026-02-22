@@ -7,7 +7,6 @@ import model.GameData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import dataaccess.DataAccessException;
-import model.UserData;
 
 import java.util.List;
 
@@ -15,10 +14,12 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class ServiceTests {
     private MemoryDataAccess dataAccess;
+    private UserService userService;
 
     @BeforeEach
     public void setUp() {
         dataAccess = new MemoryDataAccess();
+        userService = new UserService(dataAccess);
     }
     //register
     @Test
@@ -152,6 +153,34 @@ public class ServiceTests {
         int gameID2 = dataAccess.createGame(game2);
         dataAccess.clearEverything();
         assertEquals(0, dataAccess.listGames().size());
+    }
+    //USER SERVICE TESTS
+    //register
+    @Test
+    public void registerTest() throws DataAccessException {
+        UserData data = new UserData("testUser", "testUser", "testUser@email.com");
+        AuthData result = userService.register(data);
+        assertNotNull(result);
+        assertEquals("testUser", result.username());
+        assertNotNull(result.authToken());
+    }
+    //login
+    @Test
+    public void loginTest() throws DataAccessException {
+        UserData data = new UserData("testUser", "testUser", "testUser@email.com");
+        userService.register(data);
+        AuthData result = userService.login(data);
+        assertNotNull(result);
+        assertEquals("testUser", result.username());
+        assertNotNull(result.authToken());
+    }
+    //logout
+    @Test
+    public void logoutTest() throws DataAccessException {
+        UserData data = new UserData("testUser", "testUser", "testUser@email.com");
+        AuthData auth = userService.register(data);
+        userService.logout(auth.authToken());
+        assertNull(dataAccess.getAuth(auth.authToken()));
     }
 
 }
