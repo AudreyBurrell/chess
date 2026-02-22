@@ -16,12 +16,14 @@ public class ServiceTests {
     private MemoryDataAccess dataAccess;
     private UserService userService;
     private GameService gameService;
+    private ClearService clearService;
 
     @BeforeEach
     public void setUp() {
         dataAccess = new MemoryDataAccess();
         userService = new UserService(dataAccess);
         gameService = new GameService(dataAccess);
+        clearService = new ClearService(dataAccess);
     }
     //register
     @Test
@@ -232,6 +234,26 @@ public class ServiceTests {
                 DataAccessException.class,
                 () -> gameService.joinGame(auth2.authToken(), gameID, "WHITE")
         );
+    }
+    //CLEAR SERVICE TESTS
+    @Test
+    public void clearServiceTest() throws DataAccessException {
+        UserData user = new UserData("testUser", "password", "test@email.com");
+        dataAccess.createUser(user);
+        UserData user2 = new UserData("testUser2", "password2", "test2@email.com");
+        dataAccess.createUser(user2);
+        AuthData auth = dataAccess.createAuth("testUser");
+        AuthData auth2 = dataAccess.createAuth("testUser2");
+        GameData game1 = new GameData(1, null, null, "testGame", null);
+        int gameID = dataAccess.createGame(game1);
+        GameData game2 = new GameData(2, null, null, "testGame2", null);
+        int gameID2 = dataAccess.createGame(game2);
+        clearService.clearService();
+        assertNull(dataAccess.getUser("testUser"));
+        assertNull(dataAccess.getUser("testUser2"));
+        assertNull(dataAccess.getAuth(auth.authToken()));
+        assertNull(dataAccess.getAuth(auth2.authToken()));
+        assertEquals(0, dataAccess.listGames().size());
     }
 
 }
