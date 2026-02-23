@@ -23,6 +23,9 @@ public class UserService {
         return auth;
     }
     public AuthData login(UserData user) throws DataAccessException {
+        if(user.username() == null || user.password() == null) {
+            throw new DataAccessException("bad request");
+        }
         if(dataAccess.getUser(user.username()) == null) {
             throw new DataAccessException("Username does not exist");
         }

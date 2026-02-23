@@ -26,6 +26,7 @@ public class Server {
         // Register your endpoints and exception handlers here.
         javalin.delete("/db", this::clear);
         javalin.post("/user", this::register);
+        javalin.post("/session", this::login);
 
 
     }
@@ -52,6 +53,22 @@ public class Server {
             ctx.json(new Gson().toJson(auth));
         } catch (DataAccessException error) {
             ctx.status(500);
+            ctx.json("{\"message\": \"Error: " + error.getMessage() + "\"}");
+        }
+    }
+    private void login(io.javalin.http.Context ctx) {
+        try {
+            var user = new Gson().fromJson(ctx.body(), UserData.class);
+            if(user.username() == null || user.password() == null) {
+                ctx.status(400);
+                ctx.json("{\"message\": \"Error: bad request\"}");
+                return;
+            }
+            var auth = userService.login(user);
+            ctx.status(200);
+            ctx.json(new Gson().toJson(auth));
+        } catch (DataAccessException error) {
+            ctx.status(401);
             ctx.json("{\"message\": \"Error: " + error.getMessage() + "\"}");
         }
     }
