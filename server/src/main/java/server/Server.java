@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import dataaccess.DataAccessException;
 import dataaccess.MemoryDataAccess;
 import io.javalin.*;
+import model.GameData;
 import model.UserData;
 import service.ClearService;
 import service.GameService;
@@ -27,6 +28,9 @@ public class Server {
         javalin.delete("/db", this::clear);
         javalin.post("/user", this::register);
         javalin.post("/session", this::login);
+        javalin.delete("/session", this::logout);
+        //javalin.get("/game", this::listGames);
+        javalin.post("/game", this::createGame);
 
 
     }
@@ -68,10 +72,55 @@ public class Server {
             ctx.status(200);
             ctx.json(new Gson().toJson(auth));
         } catch (DataAccessException error) {
-            ctx.status(401);
+            if(error.getMessage().contains("already exists")) {
+                ctx.status(500);
+                ctx.json("{\"message\": \"Error: Username does not exist\"}");
+            } else {
+                ctx.status(401);
+                ctx.json("{\"message\": \"Error: " + error.getMessage() + "\"}");
+            }
+        }
+    }
+    private void logout(io.javalin.http.Context ctx) {
+        try {
+            String authToken = ctx.header("authorization");
+            userService.logout(authToken);
+            ctx.status(200);
+            ctx.json("{}");
+        } catch (DataAccessException error) {
+            ctx.status(500);
             ctx.json("{\"message\": \"Error: " + error.getMessage() + "\"}");
         }
     }
+    private void createGame(io.javalin.http.Context ctx) {
+        try {
+            String authToken = ctx.header("authorization");
+            if(authToken == null) {
+                ctx.status(401);
+                ctx.json("{\"message\": \"Error: unauthorized\"}");
+                return;
+            }
+            GameData gameData = new Gson().fromJson(ctx.body(), GameData.class);
+            String gameName = gameData.gameName();
+            if(gameName == null) {
+                ctx.status(400);
+                ctx.json("{\"message\": \"Error: bad request\"}");
+                return;
+            }
+            int gameID = gameService.createGame(authToken, gameName);
+            ctx.status(200);
+            ctx.json("{\"gameID\": " + gameID + "}");
+        } catch (DataAccessException error) {
+            if(error.getMessage().contains("Auth token does not exist")) {
+                ctx.status(401);
+                ctx.json("{\"message\": \"Error: unauthorized\"}");
+            } else {
+                ctx.status(500);
+                ctx.json("{\"message\": \"Error: " + error.getMessage() + "\"}");
+            }
+        }
+    }
+
 
     public int run(int desiredPort) {
         javalin.start(desiredPort);
