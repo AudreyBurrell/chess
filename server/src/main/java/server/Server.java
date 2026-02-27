@@ -31,6 +31,7 @@ public class Server {
         javalin.delete("/session", this::logout);
         //javalin.get("/game", this::listGames);
         javalin.post("/game", this::createGame);
+        javalin.put("/game", this::joinGame);
 
 
     }
@@ -56,8 +57,13 @@ public class Server {
             ctx.status(200);
             ctx.json(new Gson().toJson(auth));
         } catch (DataAccessException error) {
-            ctx.status(500);
-            ctx.json("{\"message\": \"Error: " + error.getMessage() + "\"}");
+            if(error.getMessage().contains("already exists")) {
+                ctx.status(403);
+                ctx.json("{\"message\": \"Error: Username already exists\"}");
+            } else {
+                ctx.status(500);
+                ctx.json("{\"message\": \"Error: " + error.getMessage() + "\"}");
+            }
         }
     }
     private void login(io.javalin.http.Context ctx) {
@@ -84,6 +90,11 @@ public class Server {
     private void logout(io.javalin.http.Context ctx) {
         try {
             String authToken = ctx.header("authorization");
+            if(authToken == null) {
+                ctx.status(401);
+                ctx.json("{\"message\": \"Error: unauthorized\"}");
+                return;
+            }
             userService.logout(authToken);
             ctx.status(200);
             ctx.json("{}");
@@ -118,6 +129,41 @@ public class Server {
                 ctx.status(500);
                 ctx.json("{\"message\": \"Error: " + error.getMessage() + "\"}");
             }
+        }
+    }
+    private void joinGame(io.javalin.http.Context ctx) {
+        try {
+            String authToken = ctx.header("authorization");
+            if(authToken == null) {
+                ctx.status(401);
+                ctx.json("{\"message\": \"Error: unauthorized\"}");
+                return;
+            }
+            record JoinGameReq(String playerColor, int gameID) {}
+            JoinGameReq request = new Gson().fromJson(ctx.body(), JoinGameReq.class);
+            if(request.playerColor() == null || (!request.playerColor().equals("WHITE") && !request.playerColor().equals("BLACK"))) {
+                ctx.status(400);
+                ctx.json("{\"message\": \"Error: bad request\"}");
+                return;
+            }
+            gameService.joinGame(authToken, request.gameID(), request.playerColor());
+            ctx.status(200);
+            ctx.json("{}");
+        } catch (DataAccessException error) {
+            if(error.getMessage().contains("already taken")) {
+                ctx.status(403);
+                ctx.json("{\"message\": \"Error: color already taken\"}");
+            } else if(error.getMessage().contains("Game does not exist")) {
+                ctx.status(400);
+                ctx.json("{\"message\": \"Error: bad request\"}");
+            }else if(error.getMessage().contains("does not exist")) {
+                ctx.status(401);
+                ctx.json("{\"message\": \"Error: unauthorized\"}");
+            } else {
+                ctx.status(500);
+                ctx.json("{\"message\": \"Error: " + error.getMessage() + "\"}");
+            }
+
         }
     }
 
