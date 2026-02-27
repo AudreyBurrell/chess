@@ -10,6 +10,9 @@ import service.ClearService;
 import service.GameService;
 import service.UserService;
 
+import java.util.List;
+import java.util.Map;
+
 public class Server {
 
     private final Javalin javalin;
@@ -29,7 +32,7 @@ public class Server {
         javalin.post("/user", this::register);
         javalin.post("/session", this::login);
         javalin.delete("/session", this::logout);
-        //javalin.get("/game", this::listGames);
+        javalin.get("/game", this::listGames);
         javalin.post("/game", this::createGame);
         javalin.put("/game", this::joinGame);
 
@@ -99,8 +102,13 @@ public class Server {
             ctx.status(200);
             ctx.json("{}");
         } catch (DataAccessException error) {
-            ctx.status(500);
-            ctx.json("{\"message\": \"Error: " + error.getMessage() + "\"}");
+            if(error.getMessage().contains("does not exist")) {
+                ctx.status(401);
+                ctx.json("{\"message\": \"Error: unauthorized\"}");
+            } else {
+                ctx.status(500);
+                ctx.json("{\"message\": \"Error: " + error.getMessage() + "\"}");
+            }
         }
     }
     private void createGame(io.javalin.http.Context ctx) {
@@ -163,8 +171,30 @@ public class Server {
                 ctx.status(500);
                 ctx.json("{\"message\": \"Error: " + error.getMessage() + "\"}");
             }
+        }
+    }
+    private void listGames(io.javalin.http.Context ctx) {
+        try {
+            String authToken = ctx.header("authorization");
+            if(authToken == null) {
+                ctx.status(401);
+                ctx.json("{\"message\": \"Error: unauthorized\"}");
+                return;
+            }
+            List gamesList = gameService.listGames(authToken);
+            ctx.status(200);
+            ctx.json(new Gson().toJson(Map.of("games", gamesList)));
+        } catch (DataAccessException error) {
+            if(error.getMessage().contains("does not exist")) {
+                ctx.status(401);
+                ctx.json("{\"message\": \"Error: unauthorized\"}");
+            } else {
+                ctx.status(500);
+                ctx.json("{\"message\": \"Error: " + error.getMessage() + "\"}");
+            }
 
         }
+
     }
 
 
