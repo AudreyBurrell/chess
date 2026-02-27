@@ -41,13 +41,15 @@ public class GameService {
             if(data.whiteUsername() != null) {
                 throw new DataAccessException("White is already taken");
             }
-            dataAccess.updateGame(new GameData(data.gameID(), dataAccess.getAuth(authToken).username(), data.blackUsername(), data.gameName(), data.game()));
+            dataAccess.updateGame(new GameData(data.gameID(),
+                    dataAccess.getAuth(authToken).username(), data.blackUsername(), data.gameName(), data.game()));
         }
         if(playerColor.equals("BLACK")) {
             if(data.blackUsername() != null) {
                 throw new DataAccessException("Black is already taken");
             }
-            dataAccess.updateGame(new GameData(data.gameID(), data.whiteUsername(),  dataAccess.getAuth(authToken).username(), data.gameName(), data.game()));
+            dataAccess.updateGame(new GameData(data.gameID(), data.whiteUsername(),
+                    dataAccess.getAuth(authToken).username(), data.gameName(), data.game()));
         }
     }
 }

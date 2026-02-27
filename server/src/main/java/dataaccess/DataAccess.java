@@ -22,15 +22,5 @@ public interface DataAccess {
     void updateGame(GameData game) throws DataAccessException;
 
 
-//    clear: A method for clearing all data from the database. This is used during testing. DONE
-//    createUser: Create a new user. DONE
-//    getUser: Retrieve a user with the given username. DONE
-//    createGame: Create a new game. DONE
-//    getGame: Retrieve a specified game with the given game ID. DONE
-//    listGames: Retrieve all games. DONE
-//    updateGame: Updates a chess game. It should replace the chess game string corresponding to a given gameID. This is used when players join a game or when a move is made. DONE
-//    createAuth: Create a new authorization. DONE
-//    getAuth: Retrieve an authorization given an authToken. DONE
-//    deleteAuth: Delete an authorization so that it is no longer valid. DONE
 
 }

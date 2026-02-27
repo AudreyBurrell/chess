@@ -35,15 +35,6 @@ public class MemoryDataAccess implements DataAccess {
         return authData;
     }
 
-//    @Override
-//    public UserData loginUser(UserData user) throws DataAccessException {
-//        if(getUser(user.username()) != null) {
-//            return user;
-//        } else {
-//            throw new DataAccessException("Username required");
-//        }
-//    }
-
     @Override
     public AuthData getAuth(String authToken) throws DataAccessException {
         return authDataMap.get(authToken);
@@ -79,7 +70,6 @@ public class MemoryDataAccess implements DataAccess {
 
     @Override
     public List<GameData> listGames() throws DataAccessException {
-//        return null;
         List<GameData> gameData = new ArrayList<>();
         for(int i = 1; i < idNum; i++) {
             gameData.add(getGame(i));

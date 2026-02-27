@@ -1,4 +1,4 @@
-package service;
+package java.service;
 
 import dataaccess.MemoryDataAccess;
 import model.UserData;
@@ -7,6 +7,9 @@ import model.GameData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import dataaccess.DataAccessException;
+import service.ClearService;
+import service.GameService;
+import service.UserService;
 
 import java.util.List;
 
