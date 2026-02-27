@@ -43,36 +43,18 @@ public class ServiceTests {
                 () -> dataAccess.createUser(user2)
         );
     }
-    //login test ideas
-    //positive test: user gets in
-//    @Test
-//    public void loginUserPositive() throws DataAccessException {
-//        //adding data to the dataAccess
-//        UserData user = new UserData("testUser", "password", "test@email.com");
-//        dataAccess.createUser(user);
-//        //I want to use an assert true to make sure it is in the dataAccess
-//        UserData result = dataAccess.loginUser(user);
-//        assertTrue(result != null);
-//        assertEquals("testUser", result.username());
-//    }
-    //negative test: username doesn't match
-//    @Test
-//    public void loginUserNoMatch() throws DataAccessException {
-//        UserData user = new UserData("testUser", "password", "test@email.com");
-//        dataAccess.createUser(user);
-//        UserData username = new UserData("testuser", "password", "test@email.com");
-//        assertThrows (
-//                DataAccessException.class,
-//                () -> dataAccess.loginUser(username)
-//        );
-//    }
-    //testing auth data stuff
     //creating auth data
     @Test
     public void createAuth() throws DataAccessException {
         AuthData authData = dataAccess.createAuth("testUser");
         assertNotNull(authData);
         assertNotNull(authData.authToken());
+    }
+    @Test
+    public void createAuthNegative() throws DataAccessException {
+        dataAccess.createAuth("testUser");
+        AuthData result = dataAccess.getAuth("fakeAuth1234");
+        assertNull(result);
     }
     //getting auth data
     @Test
@@ -81,6 +63,11 @@ public class ServiceTests {
         AuthData retrievedAuth = dataAccess.getAuth(auth.authToken());
         assertEquals(auth, retrievedAuth);
     }
+    @Test
+    public void getAuthNegative() throws DataAccessException {
+        AuthData result = dataAccess.getAuth("fakeAuth123");
+        assertNull(result);
+    }
     //removing auth data
     @Test
     public void removeAuthData() throws DataAccessException {
@@ -88,21 +75,33 @@ public class ServiceTests {
         dataAccess.deleteAuth(auth.authToken());
         assertNull(dataAccess.getAuth(auth.authToken()));
     }
+    @Test
+    public void removeAuthDataNegative() throws DataAccessException {
+        dataAccess.deleteAuth("fakeAuth123");
+        assertNull(dataAccess.getAuth("fakeAuth123"));
+    }
     //list game tests
     @Test
     public void listGamesTest() throws DataAccessException {
         GameData game1 = new GameData(1, null, null, "testGame", null);
         GameData game2 = new GameData(2, null, null, "testGame2", null);
         GameData game3 = new GameData(3, null, null, "testGame3", null);
-        int gameID1 = dataAccess.createGame(game1);
-        int gameID2 = dataAccess.createGame(game2);
-        int gameID3 = dataAccess.createGame(game3);
+        dataAccess.createGame(game1);
+        dataAccess.createGame(game2);
+        dataAccess.createGame(game3);
         List<GameData> gamesList = dataAccess.listGames();
         assertNotNull(gamesList);
         assertEquals(3, gamesList.size());
         assertEquals("testGame", gamesList.get(0).gameName());
         assertEquals("testGame2", gamesList.get(1).gameName());
         assertEquals("testGame3", gamesList.get(2).gameName());
+    }
+    @Test
+    public void listGamesTestNegative() throws DataAccessException {
+        assertThrows(
+                DataAccessException.class,
+                () -> gameService.listGames("fakeAuth123")
+        );
     }
     //create game tests
     @Test
@@ -111,14 +110,26 @@ public class ServiceTests {
         int gameID = dataAccess.createGame(testingGame);
         assertTrue(gameID > 0);
     }
+    @Test
+    public void createGameTestNegative() throws DataAccessException {
+        assertThrows(
+                DataAccessException.class,
+                () -> gameService.createGame("fakeAuth123", "testGame")
+        );
+    }
     //get game test
     @Test
     public void getGameTest() throws DataAccessException {
         GameData testingGame = new GameData(1, null, null, "testGame", null);
-        int gameID = dataAccess.createGame(testingGame);
+        dataAccess.createGame(testingGame);
         GameData retrievedGame = dataAccess.getGame(testingGame.gameID());
         assertNotNull(retrievedGame);
         assertEquals(testingGame.gameName(), retrievedGame.gameName());
+    }
+    @Test
+    public void getGameTestNegative() throws DataAccessException {
+        GameData result = dataAccess.getGame(1234567890);
+        assertNull(result);
     }
     //update game tests
     @Test
@@ -129,6 +140,12 @@ public class ServiceTests {
         dataAccess.updateGame(updatedGame);
         GameData retrieved = dataAccess.getGame(gameID);
         assertEquals("testUser", retrieved.whiteUsername());
+    }
+    @Test
+    public void updateGameTestNegative() throws DataAccessException {
+        GameData fakeGame = new GameData(3, "testUser", null, "testGame", null);
+        dataAccess.updateGame(fakeGame);
+        assertNull(dataAccess.getGame(1234567890));
     }
     //clear tests
     @Test
@@ -152,9 +169,9 @@ public class ServiceTests {
     @Test
     public void clearGamesTest() throws DataAccessException {
         GameData game1 = new GameData(1, null, null, "testGame", null);
-        int gameID = dataAccess.createGame(game1);
+        dataAccess.createGame(game1);
         GameData game2 = new GameData(2, null, null, "testGame2", null);
-        int gameID2 = dataAccess.createGame(game2);
+        dataAccess.createGame(game2);
         dataAccess.clearEverything();
         assertEquals(0, dataAccess.listGames().size());
     }
@@ -178,6 +195,15 @@ public class ServiceTests {
         assertEquals("testUser", result.username());
         assertNotNull(result.authToken());
     }
+    @Test
+    public void loginTestNegative() throws DataAccessException {
+        UserData data = new UserData("testUser", "testUser", "testUser@email.com");
+        userService.register(data);
+        assertThrows(
+                DataAccessException.class,
+                () -> userService.login(new UserData("testUser", "wrongPassword", "testUser@email.com"))
+        );
+    }
     //logout
     @Test
     public void logoutTest() throws DataAccessException {
@@ -185,6 +211,13 @@ public class ServiceTests {
         AuthData auth = userService.register(data);
         userService.logout(auth.authToken());
         assertNull(dataAccess.getAuth(auth.authToken()));
+    }
+    @Test
+    public void logoutTestNegative() throws DataAccessException {
+        assertThrows(
+                DataAccessException.class,
+                () -> userService.logout("fakeAuth123")
+        );
     }
     //GAME SERVICE TESTS
     //create game
@@ -195,20 +228,34 @@ public class ServiceTests {
         int gameID = gameService.createGame(auth.authToken(), "testGame");
         assertEquals(1, gameID);
     }
+    @Test
+    public void createGameServiceTestNegative() throws DataAccessException {
+        assertThrows(
+                DataAccessException.class,
+                () -> gameService.createGame("fakeAuth123", "testGame")
+        );
+    }
     //list game
     @Test
     public void listGameServiceTest() throws DataAccessException {
         GameData game1 = new GameData(1, null, null, "testGame", null);
         GameData game2 = new GameData(2, null, null, "testGame2", null);
         GameData game3 = new GameData(3, null, null, "testGame3", null);
-        int gameID1 = dataAccess.createGame(game1);
-        int gameID2 = dataAccess.createGame(game2);
-        int gameID3 = dataAccess.createGame(game3);
+        dataAccess.createGame(game1);
+        dataAccess.createGame(game2);
+        dataAccess.createGame(game3);
         UserData data = new UserData("testUser", "testUser", "testUser@email.com");
         AuthData auth = userService.register(data);
         List<GameData> gamesList = gameService.listGames(auth.authToken());
         assertNotNull(gamesList);
         assertEquals(3, gamesList.size());
+    }
+    @Test
+    public void listGameServiceTestNegative() throws DataAccessException {
+        assertThrows(
+                DataAccessException.class,
+                () -> gameService.listGames("fakeAuth123")
+        );
     }
     //join game
     @Test
@@ -245,9 +292,9 @@ public class ServiceTests {
         AuthData auth = dataAccess.createAuth("testUser");
         AuthData auth2 = dataAccess.createAuth("testUser2");
         GameData game1 = new GameData(1, null, null, "testGame", null);
-        int gameID = dataAccess.createGame(game1);
+        dataAccess.createGame(game1);
         GameData game2 = new GameData(2, null, null, "testGame2", null);
-        int gameID2 = dataAccess.createGame(game2);
+        dataAccess.createGame(game2);
         clearService.clearService();
         assertNull(dataAccess.getUser("testUser"));
         assertNull(dataAccess.getUser("testUser2"));
