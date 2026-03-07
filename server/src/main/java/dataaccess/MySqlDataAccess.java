@@ -7,6 +7,7 @@ import org.mindrot.jbcrypt.BCrypt;
 
 import java.sql.*;
 import java.util.List;
+import java.util.UUID;
 
 import static java.sql.Statement.RETURN_GENERATED_KEYS;
 import static java.sql.Types.NULL;
@@ -109,11 +110,27 @@ public class MySqlDataAccess implements DataAccess {
 
     @Override
     public AuthData createAuth(String username) throws dataaccess.DataAccessException {
-        return null;
+        String randomAuth = UUID.randomUUID().toString();
+        var statement = "INSERT INTO auth (authToken, username) VALUES (?, ?)";
+        executeUpdate(statement, randomAuth, username);
+        return new AuthData(randomAuth, username);
     }
 
     @Override
     public AuthData getAuth(String authToken) throws dataaccess.DataAccessException {
+        try (var conn = DatabaseManager.getConnection()) {
+            var statement = "SELECT authToken, username FROM auth WHERE authToken=?";
+            try (var ps = conn.prepareStatement(statement)) {
+                ps.setString(1, authToken);
+                try (var rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        return new AuthData(rs.getString("authToken"), rs.getString("username"));
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException("Unable to read auth: " + e.getMessage());
+        }
         return null;
     }
 

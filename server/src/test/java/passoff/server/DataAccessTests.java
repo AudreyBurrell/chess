@@ -35,4 +35,18 @@ public class DataAccessTests {
                 () -> dataAccess.createUser(user)
         );
     }
+    //create and get auth positive and negative tests
+    @Test
+    public void createAuthPositiveTest() throws DataAccessException {
+        AuthData auth = dataAccess.createAuth("testUser");
+        assertNotNull(auth);
+        assertNotNull(auth.authToken());
+        assertEquals("testUser", auth.username());
+    }
+    @Test
+    public void createAuthNegativeTest() throws DataAccessException {
+        AuthData auth = dataAccess.createAuth("testUser");
+        AuthData returned = dataAccess.getAuth("wrongAuth");
+        assertNull(returned);
+    }
 }
