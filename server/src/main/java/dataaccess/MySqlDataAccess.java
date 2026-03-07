@@ -3,6 +3,7 @@ package dataaccess;
 import com.google.gson.Gson;
 //import exception.DataAccessException;
 import model.*;
+import org.mindrot.jbcrypt.BCrypt;
 
 import java.sql.*;
 import java.util.List;
@@ -12,6 +13,10 @@ import static java.sql.Types.NULL;
 
 
 public class MySqlDataAccess implements DataAccess {
+
+    public MySqlDataAccess() throws DataAccessException {
+        configureDatabase();
+    }
 
     private final String[] createStatements = {
             """
@@ -54,13 +59,51 @@ public class MySqlDataAccess implements DataAccess {
         }
     }
 
+    private int executeUpdate(String statement, Object... params) throws DataAccessException {
+        try (Connection conn = DatabaseManager.getConnection()) {
+            try (PreparedStatement ps = conn.prepareStatement(statement, RETURN_GENERATED_KEYS)) {
+                for (int i = 0; i < params.length; i++) {
+                    Object param = params[i];
+                    if (param instanceof String p) ps.setString(i + 1, p);
+                    else if (param instanceof Integer p) ps.setInt(i + 1, p);
+                    else if (param == null) ps.setNull(i + 1, NULL);
+                }
+                ps.executeUpdate();
+
+                ResultSet rs = ps.getGeneratedKeys();
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+
+                return 0;
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException("Unable to update database: " + e.getMessage());
+        }
+    }
     @Override
     public UserData createUser(UserData user) throws dataaccess.DataAccessException {
-        return null;
+        String hashedPassword = BCrypt.hashpw(user.password(), BCrypt.gensalt());
+        var statement = "INSERT INTO users (username, password, email) VALUES (?, ?, ?)";
+        executeUpdate(statement, user.username(), hashedPassword, user.email());
+        return user;
     }
 
     @Override
     public UserData getUser(String username) throws dataaccess.DataAccessException {
+        try (var conn = DatabaseManager.getConnection()) {
+            var statement = "SELECT username, password, email FROM users WHERE username=?";
+            try (var ps = conn.prepareStatement(statement)) {
+                ps.setString(1, username);
+                try (var rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        return new UserData(rs.getString("username"), rs.getString("password"), rs.getString("email"));
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException("Unable to read user: " + e.getMessage());
+        }
         return null;
     }
 
@@ -81,7 +124,12 @@ public class MySqlDataAccess implements DataAccess {
 
     @Override
     public void clearEverything() throws dataaccess.DataAccessException {
-
+        var statement = "TRUNCATE users";
+        executeUpdate(statement);
+        statement = "TRUNCATE auth";
+        executeUpdate(statement);
+        statement = "TRUNCATE games";
+        executeUpdate(statement);
     }
 
     @Override
