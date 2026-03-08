@@ -49,4 +49,18 @@ public class DataAccessTests {
         AuthData returned = dataAccess.getAuth("wrongAuth");
         assertNull(returned);
     }
+    //delete auth
+    @Test
+    public void deleteAuthPositiveTest() throws DataAccessException {
+        AuthData auth = dataAccess.createAuth("testUser");
+        dataAccess.deleteAuth(auth.authToken());
+        assertNull(dataAccess.getAuth(auth.authToken()));
+
+    }
+    @Test
+    public void deleteAuthNegativeTest() throws DataAccessException {
+        dataAccess.deleteAuth("randomAuth");
+        assertNull(dataAccess.getAuth("randomAuth"));
+    }
+
 }
