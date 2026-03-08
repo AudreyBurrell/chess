@@ -152,11 +152,30 @@ public class MySqlDataAccess implements DataAccess {
 
     @Override
     public int createGame(GameData game) throws dataaccess.DataAccessException {
-        return 0;
+        var statement = "INSERT INTO games (gameName, whiteUsername, blackUsername, game) VALUES (?, ?, ?, ?)";
+        String json = new Gson().toJson(game.game());
+        return executeUpdate(statement, game.gameName(), game.whiteUsername(), game.blackUsername(), json);
     }
 
     @Override
     public GameData getGame(int gameID) throws dataaccess.DataAccessException {
+        try (var conn = DatabaseManager.getConnection()) {
+            var statement = "SELECT gameID, gameName, whiteUsername, blackUsername, game FROM games WHERE gameID=?";
+            try (var ps = conn.prepareStatement(statement)) {
+                ps.setInt(1, gameID);
+                try (var rs = ps.executeQuery()) {
+                    if(rs.next()) {
+                        var json = rs.getString("game");
+                        var chessGame = new Gson().fromJson(json, chess.ChessGame.class);
+                        return new GameData(rs.getInt("gameID"), rs.getString("whiteUsername"),
+                                rs.getString("blackUsername"), rs.getString("gameName"),
+                                chessGame);
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException("Unable to read auth: " + e.getMessage());
+        }
         return null;
     }
 

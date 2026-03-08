@@ -62,5 +62,22 @@ public class DataAccessTests {
         dataAccess.deleteAuth("randomAuth");
         assertNull(dataAccess.getAuth("randomAuth"));
     }
+    //create game tests
+    @Test
+    public void createGamePositiveTest() throws DataAccessException {
+        GameData game = new GameData(0, null, null, "testGame", null);
+        int gameID = dataAccess.createGame(game);
+        assertTrue(gameID > 0);
+        GameData retrieved = dataAccess.getGame(gameID);
+        assertNotNull(retrieved);
+        assertEquals("testGame", retrieved.gameName());
+    }
+    @Test
+    public void createGameNegativeTest() throws DataAccessException {
+        assertThrows(
+                DataAccessException.class,
+                () -> dataAccess.createGame(new GameData(0, null, null, null, null))
+        );
+    }
 
 }
