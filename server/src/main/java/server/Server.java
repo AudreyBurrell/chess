@@ -2,7 +2,6 @@ package server;
 
 import com.google.gson.Gson;
 import dataaccess.DataAccessException;
-import dataaccess.MemoryDataAccess;
 import dataaccess.MySqlDataAccess;
 import io.javalin.*;
 import model.GameData;
@@ -87,10 +86,13 @@ public class Server {
             ctx.json(new Gson().toJson(auth));
         } catch (DataAccessException error) {
             if(error.getMessage().contains("already exists")) {
-                ctx.status(500);
+                ctx.status(400);
                 ctx.json("{\"message\": \"Error: Username does not exist\"}");
-            } else {
+            } else if (error.getMessage().contains("does not exist") || error.getMessage().contains("Incorrect password")) {
                 ctx.status(401);
+                ctx.json("{\"message\": \"Error: Unauthorized\"}");
+            } else {
+                ctx.status(500);
                 ctx.json("{\"message\": \"Error: " + error.getMessage() + "\"}");
             }
         }
@@ -186,7 +188,7 @@ public class Server {
                 ctx.json("{\"message\": \"Error: unauthorized\"}");
                 return;
             }
-            List gamesList = gameService.listGames(authToken);
+            List<GameData> gamesList = gameService.listGames(authToken);
             ctx.status(200);
             ctx.json(new Gson().toJson(Map.of("games", gamesList)));
         } catch (DataAccessException error) {
