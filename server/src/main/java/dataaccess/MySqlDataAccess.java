@@ -6,6 +6,7 @@ import model.*;
 import org.mindrot.jbcrypt.BCrypt;
 
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -174,14 +175,36 @@ public class MySqlDataAccess implements DataAccess {
                 }
             }
         } catch (SQLException e) {
-            throw new DataAccessException("Unable to read auth: " + e.getMessage());
+            throw new DataAccessException("Unable to get game: " + e.getMessage());
         }
         return null;
     }
 
+    private GameData readGame(ResultSet rs) throws SQLException {
+        var id = rs.getInt("id");
+        var json = rs.getString("json");
+        GameData game = new Gson().fromJson(json, GameData.class);
+        return game;
+    }
     @Override
     public List<GameData> listGames() throws dataaccess.DataAccessException {
-        return List.of();
+        List<GameData> result = new ArrayList<>();
+        try (Connection conn = DatabaseManager.getConnection()) {
+            var statement = "SELECT gameID, gameName, whiteUsername, blackUsername, game FROM games";
+            try (PreparedStatement ps = conn.prepareStatement(statement)) {
+                try (var rs = ps.executeQuery()) {
+                    while (rs.next()) {
+                        var json = rs.getString("game");
+                        var chessGame = new Gson().fromJson(json, chess.ChessGame.class);
+                        result.add(new GameData(rs.getInt("gameID"), rs.getString("whiteUsername"),
+                                rs.getString("blackUsername"), rs.getString("gameName"), chessGame));
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException("Unable to list games: " + e.getMessage());
+        }
+        return result;
     }
 
     @Override

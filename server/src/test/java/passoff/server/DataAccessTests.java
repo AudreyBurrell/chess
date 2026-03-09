@@ -5,6 +5,9 @@ import model.AuthData;
 import model.GameData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 public class DataAccessTests {
@@ -78,6 +81,24 @@ public class DataAccessTests {
                 DataAccessException.class,
                 () -> dataAccess.createGame(new GameData(0, null, null, null, null))
         );
+    }
+    //list games
+    @Test
+    public void listGamesPositiveTest() throws DataAccessException {
+        GameData game = new GameData(0, null, null, "testGame1", null);
+        GameData game2 = new GameData(1, null, null, "testGame2", null);
+        GameData game3 = new GameData(2, null, null, "testGame3", null);
+        dataAccess.createGame(game);
+        dataAccess.createGame(game2);
+        dataAccess.createGame(game3);
+        List<GameData> gamesList = dataAccess.listGames();
+        assertNotNull(gamesList);
+        assertEquals(3, gamesList.size());
+    }
+    @Test
+    public void listGamesNegativeTest() throws DataAccessException {
+        List<GameData> gamesList = dataAccess.listGames();
+        assertEquals(0, gamesList.size());
     }
 
 }
