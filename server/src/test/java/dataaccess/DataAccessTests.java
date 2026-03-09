@@ -1,5 +1,7 @@
-package dataaccess;
+package java.dataaccess;
 
+import dataaccess.DataAccessException;
+import dataaccess.MySqlDataAccess;
 import model.UserData;
 import model.AuthData;
 import model.GameData;
@@ -48,7 +50,7 @@ public class DataAccessTests {
     }
     @Test
     public void createAuthNegativeTest() throws DataAccessException {
-        AuthData auth = dataAccess.createAuth("testUser");
+        dataAccess.createAuth("testUser");
         AuthData returned = dataAccess.getAuth("wrongAuth");
         assertNull(returned);
     }
