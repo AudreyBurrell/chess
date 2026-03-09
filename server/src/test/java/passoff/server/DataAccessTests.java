@@ -100,5 +100,23 @@ public class DataAccessTests {
         List<GameData> gamesList = dataAccess.listGames();
         assertEquals(0, gamesList.size());
     }
+    //create game
+    @Test
+    public void updateGamePositiveTest() throws DataAccessException {
+        GameData game = new GameData(0, null, null, "testGame", null);
+        int gameID = dataAccess.createGame(game);
+        GameData updatedGame = new GameData(gameID, "testUser", null, "testGame", null);
+        dataAccess.updateGame(updatedGame);
+        GameData retrieved = dataAccess.getGame(gameID);
+        assertEquals(1, retrieved.gameID());
+        assertEquals("testUser", retrieved.whiteUsername());
+
+    }
+    @Test
+    public void updateGameNegativeTest() throws DataAccessException {
+        GameData game = new GameData(9999999, "testUser", null, "fakeGame", null);
+        dataAccess.updateGame(game);
+        assertNull(dataAccess.getGame(9999999));
+    }
 
 }
