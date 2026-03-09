@@ -5,6 +5,7 @@ import dataaccess.DataAccessException;
 import model.UserData;
 import model.AuthData;
 import model.GameData;
+import org.mindrot.jbcrypt.BCrypt;
 
 public class UserService {
     private final DataAccess dataAccess;
@@ -30,7 +31,7 @@ public class UserService {
             throw new DataAccessException("Username does not exist");
         }
         UserData experimentUser = dataAccess.getUser(user.username());
-        if(!experimentUser.password().equals(user.password())) {
+        if(!BCrypt.checkpw(user.password(), experimentUser.password())) {
             throw new DataAccessException("Incorrect password");
         }
         AuthData auth = dataAccess.createAuth(user.username());

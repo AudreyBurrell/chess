@@ -3,6 +3,7 @@ package server;
 import com.google.gson.Gson;
 import dataaccess.DataAccessException;
 import dataaccess.MemoryDataAccess;
+import dataaccess.MySqlDataAccess;
 import io.javalin.*;
 import model.GameData;
 import model.UserData;
@@ -22,10 +23,14 @@ public class Server {
 
     public Server() {
         javalin = Javalin.create(config -> config.staticFiles.add("web"));
-        var dataAccess = new MemoryDataAccess();
-        userService = new UserService(dataAccess);
-        gameService = new GameService(dataAccess);
-        clearService = new ClearService(dataAccess);
+        try {
+            var dataAccess = new MySqlDataAccess();
+            userService = new UserService(dataAccess);
+            gameService = new GameService(dataAccess);
+            clearService = new ClearService(dataAccess);
+        } catch (DataAccessException e) {
+            throw new RuntimeException(e);
+        }
 
         // Register your endpoints and exception handlers here.
         javalin.delete("/db", this::clear);
