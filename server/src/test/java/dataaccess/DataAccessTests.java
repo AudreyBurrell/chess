@@ -1,4 +1,4 @@
-package java.dataaccess;
+package dataaccess;
 
 import dataaccess.DataAccessException;
 import dataaccess.MySqlDataAccess;
