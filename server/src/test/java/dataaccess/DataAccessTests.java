@@ -40,7 +40,20 @@ public class DataAccessTests {
                 () -> dataAccess.createUser(user)
         );
     }
-    //create and get auth positive and negative tests
+    //get user tests
+    @Test
+    public void getUserPositiveTest() throws DataAccessException {
+        dataAccess.createUser(new UserData("testUser", "password", "test@email.com"));
+        UserData result = dataAccess.getUser("testUser");
+        assertNotNull(result);
+        assertEquals("test@email.com", result.email());
+    }
+    @Test
+    public void getUserNegativeTest() throws DataAccessException {
+        UserData result = dataAccess.getUser("fakeUsername");
+        assertNull(result);
+    }
+    //create auth tests
     @Test
     public void createAuthPositiveTest() throws DataAccessException {
         AuthData auth = dataAccess.createAuth("testUser");
@@ -53,6 +66,19 @@ public class DataAccessTests {
         dataAccess.createAuth("testUser");
         AuthData returned = dataAccess.getAuth("wrongAuth");
         assertNull(returned);
+    }
+    //get auth test
+    @Test
+    public void getAuthPositiveTest() throws DataAccessException {
+        AuthData auth = dataAccess.createAuth("testUser");
+        AuthData retrieved = dataAccess.getAuth(auth.authToken());
+        assertNotNull(retrieved);
+        assertEquals("testUser", retrieved.username());
+    }
+    @Test
+    public void getAuthNegativeTest() throws DataAccessException {
+        AuthData retrieved = dataAccess.getAuth("fakeToken");
+        assertNull(retrieved);
     }
     //delete auth
     @Test
@@ -83,6 +109,21 @@ public class DataAccessTests {
                 DataAccessException.class,
                 () -> dataAccess.createGame(new GameData(0, null, null, null, null))
         );
+    }
+    //get game test
+    @Test
+    public void getGamePositiveTest() throws DataAccessException {
+        GameData game = new GameData(0, null, null, "testGame", null);
+        int gameID =  dataAccess.createGame(game);
+        GameData retrieved = dataAccess.getGame(gameID);
+        assertNotNull(retrieved);
+        assertEquals("testGame", retrieved.gameName());
+        assertEquals(1, retrieved.gameID());
+    }
+    @Test
+    public void getGameNegativeTest() throws DataAccessException {
+        GameData retrieved = dataAccess.getGame(1234567890);
+        assertNull(retrieved);
     }
     //list games
     @Test
