@@ -180,12 +180,6 @@ public class MySqlDataAccess implements DataAccess {
         return null;
     }
 
-    private GameData readGame(ResultSet rs) throws SQLException {
-        var id = rs.getInt("id");
-        var json = rs.getString("json");
-        GameData game = new Gson().fromJson(json, GameData.class);
-        return game;
-    }
     @Override
     public List<GameData> listGames() throws dataaccess.DataAccessException {
         List<GameData> result = new ArrayList<>();
