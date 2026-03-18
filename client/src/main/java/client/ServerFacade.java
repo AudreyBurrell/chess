@@ -14,7 +14,9 @@ public class ServerFacade {
     private final HttpClient client = HttpClient.newHttpClient();
     private final String serverUrl;
 
-    public ServerFacade(String url) { serverUrl = url; }
+    public ServerFacade(int port) {
+        serverUrl = "http://localhost:" + port;
+    }
 
     public AuthData register(String username, String password, String email) throws Exception {
         //stuff goes in here
