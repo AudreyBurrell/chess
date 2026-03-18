@@ -8,6 +8,7 @@ import java.net.http.*;
 import java.net.http.HttpRequest.BodyPublisher;
 import java.net.http.HttpRequest.BodyPublishers;
 import java.net.http.HttpResponse.BodyHandlers;
+import java.util.List;
 
 public class ServerFacade {
     private final HttpClient client = HttpClient.newHttpClient();
@@ -15,14 +16,18 @@ public class ServerFacade {
 
     public ServerFacade(String url) { serverUrl = url; }
 
-//    public RegisterResult register(RegisterRequest request) {
-//        //http work goes here
-//        //http request to call the web api, get back result
-//        //handles all the serialization and deserialization
-//    }
-//    public LoginResult login(LoginRequest request) {...}
-//
-//    public JoinResult joinGame(JoinRequest request) {...}
+    public AuthData register(String username, String password, String email) throws Exception {
+        //stuff goes in here
+        ...
+    }
+
+    public AuthData login(String username, String password) throws Exception {...}
+    public void logout(String authToken) throws Exception {}
+    public int createGame(String authToken, String gameName) throws Exception {}
+    public List<GameData> listGames(String authToken) throws Exception {}
+    public void joinGame(String authToken, int gameID, String playerColor) throws Exception {}
+    public void clear() throws Exception {}
+
 
     private HttpRequest buildRequest(String method, String path, Object body) {
         var request = HttpRequest.newBuilder()
