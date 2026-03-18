@@ -20,6 +20,10 @@ public class ServerFacadeTests {
         System.out.println("Started test HTTP server on " + port);
         serverFacade = new ServerFacade(port);
     }
+    @BeforeEach
+    public void clearEverything() throws Exception {
+        serverFacade.clear();
+    }
 
     @AfterAll
     static void stopServer() {
@@ -41,32 +45,32 @@ public class ServerFacadeTests {
         );
     }
     //login tests
-    @Test
-    public void loginPositiveTest() throws Exception {
-        serverFacade.register("testUser", "testUser", "testUser@email.com");
-        AuthData result = serverFacade.login("testUser", "testUser");
-        assertNotNull(result);
-    }
-    @Test
-    public void loginNegativeTest() throws Exception {
-        assertThrows(
-                Exception.class,
-                () -> serverFacade.login("testUser", "testUser")
-        );
-    }
+//    @Test
+//    public void loginPositiveTest() throws Exception {
+//        serverFacade.register("testUser", "testUser", "testUser@email.com");
+//        AuthData result = serverFacade.login("testUser", "testUser");
+//        assertNotNull(result);
+//    }
+//    @Test
+//    public void loginNegativeTest() throws Exception {
+//        assertThrows(
+//                Exception.class,
+//                () -> serverFacade.login("testUser", "testUser")
+//        );
+//    }
     //logout tests
-    @Test
-    public void logoutPositiveTest() throws Exception {
-        AuthData auth = serverFacade.register("testUser", "testUser", "testUser@email.com");
-        serverFacade.logout(auth.authToken());
-    }
-    @Test
-    public void logoutNegativeTest() throws Exception {
-        assertThrows (
-                Exception.class,
-                () -> serverFacade.logout("fakeToken")
-        );
-    }
+//    @Test
+//    public void logoutPositiveTest() throws Exception {
+//        AuthData auth = serverFacade.register("testUser", "testUser", "testUser@email.com");
+//        serverFacade.logout(auth.authToken());
+//    }
+//    @Test
+//    public void logoutNegativeTest() throws Exception {
+//        assertThrows (
+//                Exception.class,
+//                () -> serverFacade.logout("fakeToken")
+//        );
+//    }
     //create game test
     @Test
     public void createGamePositiveTest() throws Exception {

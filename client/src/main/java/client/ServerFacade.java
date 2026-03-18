@@ -19,16 +19,21 @@ public class ServerFacade {
     }
 
     public AuthData register(String username, String password, String email) throws Exception {
-        //stuff goes in here
-        ...
+        var request = buildRequest("POST", "/user", new UserData(username, password, email));
+        var response = sendRequest(request);
+        return handleResponse(response, AuthData.class);
     }
 
-    public AuthData login(String username, String password) throws Exception {...}
-    public void logout(String authToken) throws Exception {}
-    public int createGame(String authToken, String gameName) throws Exception {}
-    public List<GameData> listGames(String authToken) throws Exception {}
-    public void joinGame(String authToken, int gameID, String playerColor) throws Exception {}
-    public void clear() throws Exception {}
+//    public AuthData login(String username, String password) throws Exception {...}
+//    public void logout(String authToken) throws Exception {}
+//    public int createGame(String authToken, String gameName) throws Exception {}
+//    public List<GameData> listGames(String authToken) throws Exception {}
+//    public void joinGame(String authToken, int gameID, String playerColor) throws Exception {}
+    public void clear() throws Exception {
+        var request = buildRequest("DELETE", "/db", null);
+        var response = sendRequest(request);
+        handleResponse(response, null);
+    }
 
 
     private HttpRequest buildRequest(String method, String path, Object body) {
