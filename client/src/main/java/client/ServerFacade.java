@@ -54,13 +54,27 @@ public class ServerFacade {
             return gameID;
         }
     }
-
     public int createGame(String authToken, String gameName) throws Exception {
         var request = buildRequest("POST", "/game", new GameBodyRequest(gameName), authToken);
         var response = sendRequest(request);
         return handleResponse(response, GameIDResponse.class).getGameID();
     }
-//    public List<GameData> listGames(String authToken) throws Exception {}
+
+    //deserializing list data
+    public final class ListGameResponse {
+        private final List<GameData> games;
+        public ListGameResponse(List<GameData> games) {
+            this.games = games;
+        }
+        public List<GameData> getGames() {
+            return games;
+        }
+    }
+    public List<GameData> listGames(String authToken) throws Exception {
+        var request = buildRequest("GET", "/game", null, authToken);
+        var response = sendRequest(request);
+        return handleResponse(response, ListGameResponse.class).getGames();
+    }
 //    public void joinGame(String authToken, int gameID, String playerColor) throws Exception {}
     public void clear() throws Exception {
         var request = buildRequest("DELETE", "/db", null, null);
