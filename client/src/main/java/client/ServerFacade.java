@@ -76,8 +76,20 @@ public class ServerFacade {
         return handleResponse(response, ListGameResponse.class).getGames();
     }
 
-    public void joinGame(String authToken, int gameID, String playerColor) throws Exception {
+    //deserializing gameID and playerCoor
+    public final class JoinGameBodyRequest {
+        private final int gameID;
+        private final String playerColor;
+        public JoinGameBodyRequest(int gameID, String playerColor) {
+            this.gameID = gameID;
+            this.playerColor = playerColor;
+        }
 
+    }
+    public void joinGame(String authToken, int gameID, String playerColor) throws Exception {
+        var request = buildRequest("PUT", "/game", new JoinGameBodyRequest(gameID, playerColor), authToken);
+        var response = sendRequest(request);
+        handleResponse(response, null);
     }
 
     public void clear() throws Exception {
