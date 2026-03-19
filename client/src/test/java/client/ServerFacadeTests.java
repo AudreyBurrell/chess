@@ -5,6 +5,10 @@ import model.AuthData;
 import model.GameData;
 import org.junit.jupiter.api.*;
 import server.Server;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 
@@ -74,29 +78,51 @@ public class ServerFacadeTests {
     //create game test
     @Test
     public void createGamePositiveTest() throws Exception {
-
+        AuthData auth = serverFacade.register("testUser", "testUser", "testUser@email.com");
+        int gameID = serverFacade.createGame(auth.authToken(), "testGame");
+        assert(gameID > 0);
     }
     @Test
     public void createGameNegativeTest() throws Exception {
-
+        assertThrows(
+                Exception.class,
+                () -> serverFacade.createGame("fakeToken", "testGame")
+        );
     }
     //list game test
     @Test
     public void listGamePositiveTest() throws Exception {
-
+        AuthData auth = serverFacade.register("testUser", "testUser", "testUser@email.com");
+        serverFacade.createGame(auth.authToken(), "game1");
+        serverFacade.createGame(auth.authToken(), "game2");
+        serverFacade.createGame(auth.authToken(), "game3");
+        List<GameData> gameList = new ArrayList(serverFacade.listGames(auth.authToken()));
+        assertNotNull(gameList);
+        assertEquals(3, gameList.size());
     }
     @Test
     public void listGameNegativeTest() throws Exception {
-
+        assertThrows(
+                Exception.class,
+                () -> serverFacade.listGames("fakeToken")
+        );
     }
     //join game test
     @Test
     public void joinGamePositiveTest() throws Exception {
-
+        AuthData auth = serverFacade.register("testUser", "testUser", "testUser@email.com");
+        int gameID = serverFacade.createGame(auth.authToken(), "testGame");
+        serverFacade.joinGame(auth.authToken(), gameID, "WHITE");
     }
     @Test
     public void joinGameNegativeTest() throws Exception {
-
+        AuthData auth = serverFacade.register("testUser", "testUser", "testUser@email.com");
+        int gameID = serverFacade.createGame(auth.authToken(), "testGame");
+        serverFacade.joinGame(auth.authToken(), gameID, "WHITE");
+        assertThrows(
+                Exception.class,
+                () -> serverFacade.joinGame(auth.authToken(), gameID, "WHITE")
+        );
     }
     //clear test
     @Test

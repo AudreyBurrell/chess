@@ -34,9 +34,9 @@ public class ServerFacade {
         var response = sendRequest(request);
         handleResponse(response, null);
     }
-//    public int createGame(String authToken, String gameName) throws Exception {}
-//    public List<GameData> listGames(String authToken) throws Exception {}
-//    public void joinGame(String authToken, int gameID, String playerColor) throws Exception {}
+    public int createGame(String authToken, String gameName) throws Exception {}
+    public List<GameData> listGames(String authToken) throws Exception {}
+    public void joinGame(String authToken, int gameID, String playerColor) throws Exception {}
     public void clear() throws Exception {
         var request = buildRequest("DELETE", "/db", null, null);
         var response = sendRequest(request);
