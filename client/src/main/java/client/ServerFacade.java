@@ -75,7 +75,11 @@ public class ServerFacade {
         var response = sendRequest(request);
         return handleResponse(response, ListGameResponse.class).getGames();
     }
-//    public void joinGame(String authToken, int gameID, String playerColor) throws Exception {}
+
+    public void joinGame(String authToken, int gameID, String playerColor) throws Exception {
+
+    }
+
     public void clear() throws Exception {
         var request = buildRequest("DELETE", "/db", null, null);
         var response = sendRequest(request);
