@@ -34,9 +34,34 @@ public class ServerFacade {
         var response = sendRequest(request);
         handleResponse(response, null);
     }
-    public int createGame(String authToken, String gameName) throws Exception {}
-    public List<GameData> listGames(String authToken) throws Exception {}
-    public void joinGame(String authToken, int gameID, String playerColor) throws Exception {}
+
+    //helper functions to get the game body and id
+    public final class GameBodyRequest {
+        private final String gameName;
+        public GameBodyRequest(String gameName) {
+            this.gameName = gameName;
+        }
+        public String getGameName() {
+            return gameName;
+        }
+    }
+    public final class GameIDResponse {
+        private final int gameID;
+        public GameIDResponse(int gameID) {
+            this.gameID = gameID;
+        }
+        public int getGameID() {
+            return gameID;
+        }
+    }
+
+    public int createGame(String authToken, String gameName) throws Exception {
+        var request = buildRequest("POST", "/game", new GameBodyRequest(gameName), authToken);
+        var response = sendRequest(request);
+        return handleResponse(response, GameIDResponse.class).getGameID();
+    }
+//    public List<GameData> listGames(String authToken) throws Exception {}
+//    public void joinGame(String authToken, int gameID, String playerColor) throws Exception {}
     public void clear() throws Exception {
         var request = buildRequest("DELETE", "/db", null, null);
         var response = sendRequest(request);

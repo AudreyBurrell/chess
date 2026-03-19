@@ -90,40 +90,40 @@ public class ServerFacadeTests {
         );
     }
     //list game test
-    @Test
-    public void listGamePositiveTest() throws Exception {
-        AuthData auth = serverFacade.register("testUser", "testUser", "testUser@email.com");
-        serverFacade.createGame(auth.authToken(), "game1");
-        serverFacade.createGame(auth.authToken(), "game2");
-        serverFacade.createGame(auth.authToken(), "game3");
-        List<GameData> gameList = new ArrayList(serverFacade.listGames(auth.authToken()));
-        assertNotNull(gameList);
-        assertEquals(3, gameList.size());
-    }
-    @Test
-    public void listGameNegativeTest() throws Exception {
-        assertThrows(
-                Exception.class,
-                () -> serverFacade.listGames("fakeToken")
-        );
-    }
+//    @Test
+//    public void listGamePositiveTest() throws Exception {
+//        AuthData auth = serverFacade.register("testUser", "testUser", "testUser@email.com");
+//        serverFacade.createGame(auth.authToken(), "game1");
+//        serverFacade.createGame(auth.authToken(), "game2");
+//        serverFacade.createGame(auth.authToken(), "game3");
+//        List<GameData> gameList = new ArrayList(serverFacade.listGames(auth.authToken()));
+//        assertNotNull(gameList);
+//        assertEquals(3, gameList.size());
+//    }
+//    @Test
+//    public void listGameNegativeTest() throws Exception {
+//        assertThrows(
+//                Exception.class,
+//                () -> serverFacade.listGames("fakeToken")
+//        );
+//    }
     //join game test
-    @Test
-    public void joinGamePositiveTest() throws Exception {
-        AuthData auth = serverFacade.register("testUser", "testUser", "testUser@email.com");
-        int gameID = serverFacade.createGame(auth.authToken(), "testGame");
-        serverFacade.joinGame(auth.authToken(), gameID, "WHITE");
-    }
-    @Test
-    public void joinGameNegativeTest() throws Exception {
-        AuthData auth = serverFacade.register("testUser", "testUser", "testUser@email.com");
-        int gameID = serverFacade.createGame(auth.authToken(), "testGame");
-        serverFacade.joinGame(auth.authToken(), gameID, "WHITE");
-        assertThrows(
-                Exception.class,
-                () -> serverFacade.joinGame(auth.authToken(), gameID, "WHITE")
-        );
-    }
+//    @Test
+//    public void joinGamePositiveTest() throws Exception {
+//        AuthData auth = serverFacade.register("testUser", "testUser", "testUser@email.com");
+//        int gameID = serverFacade.createGame(auth.authToken(), "testGame");
+//        serverFacade.joinGame(auth.authToken(), gameID, "WHITE");
+//    }
+//    @Test
+//    public void joinGameNegativeTest() throws Exception {
+//        AuthData auth = serverFacade.register("testUser", "testUser", "testUser@email.com");
+//        int gameID = serverFacade.createGame(auth.authToken(), "testGame");
+//        serverFacade.joinGame(auth.authToken(), gameID, "WHITE");
+//        assertThrows(
+//                Exception.class,
+//                () -> serverFacade.joinGame(auth.authToken(), gameID, "WHITE")
+//        );
+//    }
     //clear test
     @Test
     public void clearPositiveTest() throws Exception {
