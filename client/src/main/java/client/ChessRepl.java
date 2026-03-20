@@ -18,6 +18,37 @@ public class ChessRepl {
     public void run() {
         System.out.println("Welcome to Chess.");
         System.out.print(help());
+
+        Scanner scanner = new Scanner(System.in);
+        var result = "";
+        while (!result.equals("quit")) {
+            printPrompt();
+            String line = scanner.nextLine();
+            try {
+                result = eval(line);
+                System.out.print(SET_TEXT_COLOR_BLUE + result);
+            } catch (Throwable e){
+                var msg = e.toString();
+                System.out.print(msg);
+            }
+        }
+        System.out.println();
+    }
+    private void printPrompt() {
+        System.out.print("\n" + RESET_TEXT_COLOR + ">>> " + SET_TEXT_COLOR_GREEN);
+    }
+    public String eval(String input) {
+        try {
+            String[] tokens = input.toLowerCase().split(" ");
+            String cmd = (tokens.length > 0) ? tokens[0] : "help";
+            String[] params = Arrays.copyOfRange(tokens, 1, tokens.length);
+            return switch (cmd) {
+                //all the cases goes here
+                default -> help();
+            };
+        } catch (Exception e) {
+            return e.getMessage();
+        }
     }
     public String help() {
         if(state == State.SIGNEDOUT) {
