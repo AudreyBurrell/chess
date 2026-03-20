@@ -124,6 +124,7 @@ public class ServerFacade {
         try {
             return client.send(request, BodyHandlers.ofString());
         } catch (Exception ex) {
+            System.out.println("DEBUG sendRequest exception: " + ex.getClass().getName() + " - " + ex.getMessage());
             throw new Exception(ex.getMessage());
         }
     }
@@ -142,6 +143,8 @@ public class ServerFacade {
         if (responseClass != null) {
             return new Gson().fromJson(response.body(), responseClass);
         }
+        System.out.println("DEBUG response body: " + response.body());
+        System.out.println("DEBUG status: " + status);
 
         return null;
     }

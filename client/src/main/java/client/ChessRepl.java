@@ -26,6 +26,9 @@ public class ChessRepl {
             String line = scanner.nextLine();
             try {
                 result = eval(line);
+                if(result == null) {
+                    result = "";
+                }
                 System.out.print(SET_TEXT_COLOR_BLUE + result);
             } catch (Throwable e){
                 var msg = e.toString();
@@ -44,11 +47,30 @@ public class ChessRepl {
             String[] params = Arrays.copyOfRange(tokens, 1, tokens.length);
             return switch (cmd) {
                 //all the cases goes here
+                case "register" -> register(params);
                 default -> help();
             };
         } catch (Exception e) {
+            System.out.println("DEBUG ERROR: " + e.getClass().getName() + " - " + e.getMessage());
             return e.getMessage();
         }
+    }
+
+    public String register(String... params) throws Exception {
+        System.out.println("DEBUG: starting register");
+        if(params.length != 3) {
+            return "Expected: <USERNAME> <PASSWORD> <EMAIL>";
+        }
+        System.out.println("DEBUG: params ok");
+        String username = params[0];
+        String password = params[1];
+        String email = params[2];
+        System.out.println("DEBUG: calling serverFacade.register");
+        AuthData auth = serverFacade.register(username, password, email);
+        System.out.println("DEBUG: got auth: " + auth);
+        authToken = auth.authToken();
+        state = State.SIGNEDIN;
+        return "Welcome " + username + "\n";
     }
     public String help() {
         if(state == State.SIGNEDOUT) {
@@ -68,6 +90,11 @@ public class ChessRepl {
                     quit - stop playing chess
                     help - display possible commands
                     """;
+        }
+    }
+    private void assertSignedIn() throws Exception {
+        if (state == State.SIGNEDOUT) {
+            throw new Exception("You must sign in");
         }
     }
 }
