@@ -48,6 +48,8 @@ public class ChessRepl {
             return switch (cmd) {
                 //all the cases goes here
                 case "register" -> register(params);
+                case "login" -> login(params);
+                case "logout" -> logout();
                 default -> help();
             };
         } catch (Exception e) {
@@ -57,21 +59,35 @@ public class ChessRepl {
     }
 
     public String register(String... params) throws Exception {
-        System.out.println("DEBUG: starting register");
         if(params.length != 3) {
             return "Expected: <USERNAME> <PASSWORD> <EMAIL>";
         }
-        System.out.println("DEBUG: params ok");
         String username = params[0];
         String password = params[1];
         String email = params[2];
-        System.out.println("DEBUG: calling serverFacade.register");
         AuthData auth = serverFacade.register(username, password, email);
-        System.out.println("DEBUG: got auth: " + auth);
         authToken = auth.authToken();
         state = State.SIGNEDIN;
         return "Welcome " + username + "\n";
     }
+    public String login(String... params) throws Exception {
+        if(params.length != 2) {
+            return "Expected: <USERNAME> <PASSWORD>";
+        }
+        String username = params[0];
+        String password = params[1];
+        AuthData auth = serverFacade.login(username, password);
+        authToken = auth.authToken();
+        state = State.SIGNEDIN;
+        return "Welcome " + username + "\n";
+    }
+    public String logout() throws Exception {
+        assertSignedIn();
+        serverFacade.logout(authToken);
+        state = State.SIGNEDOUT;
+        return "You have logged out.";
+    }
+
     public String help() {
         if(state == State.SIGNEDOUT) {
             return """
