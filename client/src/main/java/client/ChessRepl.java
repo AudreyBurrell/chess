@@ -54,6 +54,7 @@ public class ChessRepl {
                 case "create" -> createGame(params);
                 case "list" -> listGames();
                 case "join" -> joinGame(params);
+                case "observe" -> observeGame(params);
                 default -> help();
             };
         } catch (Exception e) {
@@ -124,8 +125,19 @@ public class ChessRepl {
         List<GameData> gamesList = serverFacade.listGames(authToken);
         GameData selectedGame = gamesList.get(gameNumber - 1);
         serverFacade.joinGame(authToken, selectedGame.gameID(), playerColor);
+        //drawing the board
         return "Joined game " + selectedGame.gameName() + " as " + playerColor;
-
+    }
+    public String observeGame(String... params) throws Exception {
+        assertSignedIn();
+        if(params.length != 1) {
+            return "Expected: <ID>";
+        }
+        int gameNumber = Integer.parseInt(params[0]);
+        List<GameData> gamesList = serverFacade.listGames(authToken);
+        GameData selectedGame = gamesList.get(gameNumber - 1);
+        //drawing the board
+        return "Observing game " + selectedGame.gameName();
     }
 
     public String help() {
