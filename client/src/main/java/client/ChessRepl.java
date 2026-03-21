@@ -52,7 +52,8 @@ public class ChessRepl {
                 case "login" -> login(params);
                 case "logout" -> logout();
                 case "create" -> createGame(params);
-                case "list" -> listGames(params);
+                case "list" -> listGames();
+                case "join" -> joinGame(params);
                 default -> help();
             };
         } catch (Exception e) {
@@ -98,7 +99,7 @@ public class ChessRepl {
         int gameID = serverFacade.createGame(authToken, params[0]);
         return "You have created " + params[0] + " with ID = " + gameID;
     }
-    public String listGames(String... params) throws Exception {
+    public String listGames() throws Exception {
         assertSignedIn();
         List<GameData> gameList = serverFacade.listGames(authToken);
         var result = new StringBuilder();
@@ -112,6 +113,19 @@ public class ChessRepl {
             i++;
         }
         return "Here are the games: \n" + result.toString();
+    }
+    public String joinGame(String... params) throws Exception {
+        assertSignedIn();
+        if (params.length != 2) {
+            return "Expected: <ID> <WHITE or BLACK>";
+        }
+        int gameNumber = Integer.parseInt(params[0]);
+        String playerColor = params[1].toUpperCase();
+        List<GameData> gamesList = serverFacade.listGames(authToken);
+        GameData selectedGame = gamesList.get(gameNumber - 1);
+        serverFacade.joinGame(authToken, selectedGame.gameID(), playerColor);
+        return "Joined game " + selectedGame.gameName() + " as " + playerColor;
+
     }
 
     public String help() {
@@ -145,7 +159,7 @@ public class ChessRepl {
     * logout DONE
     * create game DONE
     * list agme DONE
-    * join game
+    * join game DONE
     * observe game
     * quit (for both states)
     * */
