@@ -55,6 +55,7 @@ public class ChessRepl {
                 case "list" -> listGames();
                 case "join" -> joinGame(params);
                 case "observe" -> observeGame(params);
+                case "quit" -> quit();
                 default -> help();
             };
         } catch (Exception e) {
@@ -139,6 +140,9 @@ public class ChessRepl {
         //drawing the board
         return "Observing game " + selectedGame.gameName();
     }
+    public String quit() {
+        return "Quitting...";
+    }
 
     public String help() {
         if(state == State.SIGNEDOUT) {
@@ -165,15 +169,6 @@ public class ChessRepl {
             throw new Exception("You must sign in");
         }
     }
-    /*to do:
-    * register DONE
-    * login DONE
-    * logout DONE
-    * create game DONE
-    * list agme DONE
-    * join game DONE
-    * observe game
-    * quit (for both states)
-    * */
+
 
 }
