@@ -50,10 +50,11 @@ public class ChessRepl {
                 case "register" -> register(params);
                 case "login" -> login(params);
                 case "logout" -> logout();
+                case "create" -> createGame(params);
                 default -> help();
             };
         } catch (Exception e) {
-            System.out.println("DEBUG ERROR: " + e.getClass().getName() + " - " + e.getMessage());
+            //System.out.println("DEBUG ERROR: " + e.getClass().getName() + " - " + e.getMessage());
             return e.getMessage();
         }
     }
@@ -79,13 +80,21 @@ public class ChessRepl {
         AuthData auth = serverFacade.login(username, password);
         authToken = auth.authToken();
         state = State.SIGNEDIN;
-        return "Welcome " + username + "\n";
+        return "Welcome " + username + ". Type 'help' to view commands \n";
     }
     public String logout() throws Exception {
         assertSignedIn();
         serverFacade.logout(authToken);
         state = State.SIGNEDOUT;
         return "You have logged out.";
+    }
+    public String createGame(String... params) throws Exception {
+        assertSignedIn();
+        if(params.length != 1) {
+            return "Expected: <GAME NAME>";
+        }
+        int gameID = serverFacade.createGame(authToken, params[0]);
+        return "You have created " + params[0] + " with ID = " + gameID;
     }
 
     public String help() {
@@ -98,7 +107,7 @@ public class ChessRepl {
                     """;
         } else {
             return """
-                    create <NAME> - create a game with name
+                    create <GAME NAME> - create a game with name
                     list - list all games
                     join <ID> <WHITE or BLACK> - join a game as white or black
                     observe <ID> - observe a game
@@ -113,4 +122,15 @@ public class ChessRepl {
             throw new Exception("You must sign in");
         }
     }
+    /*to do:
+    * register DONE
+    * login DONE
+    * logout DONE
+    * create game DONE
+    * list agme
+    * join game
+    * observe game
+    * quit (for both states)
+    * */
+
 }
