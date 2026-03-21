@@ -1,6 +1,7 @@
 package client;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Scanner;
 import com.google.gson.Gson;
 import model.*;
@@ -51,6 +52,7 @@ public class ChessRepl {
                 case "login" -> login(params);
                 case "logout" -> logout();
                 case "create" -> createGame(params);
+                case "list" -> listGames(params);
                 default -> help();
             };
         } catch (Exception e) {
@@ -96,6 +98,21 @@ public class ChessRepl {
         int gameID = serverFacade.createGame(authToken, params[0]);
         return "You have created " + params[0] + " with ID = " + gameID;
     }
+    public String listGames(String... params) throws Exception {
+        assertSignedIn();
+        List<GameData> gameList = serverFacade.listGames(authToken);
+        var result = new StringBuilder();
+        int i = 1;
+        for(GameData game : gameList) {
+            result.append(i).append(". ")
+                    .append(game.gameName())
+                    .append(" | White: ").append(game.whiteUsername() != null ? game.whiteUsername() : "empty")
+                    .append(" | Black: ").append(game.blackUsername() != null ? game.blackUsername() : "empty")
+                    .append("\n");
+            i++;
+        }
+        return "Here are the games: \n" + result.toString();
+    }
 
     public String help() {
         if(state == State.SIGNEDOUT) {
@@ -127,7 +144,7 @@ public class ChessRepl {
     * login DONE
     * logout DONE
     * create game DONE
-    * list agme
+    * list agme DONE
     * join game
     * observe game
     * quit (for both states)
