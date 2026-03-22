@@ -128,7 +128,7 @@ public class ChessRepl {
         int endCol;
         int colStep;
         if(!whitePerspective) {
-            colLabels = new String[]{"h", "g", "f", "e", "d", "c", "b", "a"};
+            //colLabels = new String[]{"h", "g", "f", "e", "d", "c", "b", "a"};
             startRow = 1;
             endRow = 8;
             rowStep = 1;
@@ -136,7 +136,7 @@ public class ChessRepl {
             endCol = 1;
             colStep = -1;
         } else {
-            colLabels = new String[]{"a", "b", "c", "d", "e", "f", "g", "h"};
+            //colLabels = new String[]{"a", "b", "c", "d", "e", "f", "g", "h"};
             startRow = 8;
             endRow = 1;
             rowStep = -1;
@@ -144,36 +144,30 @@ public class ChessRepl {
             endCol = 8;
             colStep = 1;
         }
-        System.out.print(RESET_BG_COLOR + "   ");
-        for (String col : colLabels) {
-            System.out.print(col);
-        }
+        System.out.print(RESET_BG_COLOR + SET_TEXT_COLOR_WHITE + "     a   b    c    d   e    f    g   h");
         System.out.println();
         for(int row = startRow; whitePerspective ? row >= endRow : row <= endRow; row += rowStep) {
-            System.out.print(RESET_BG_COLOR + " " + row + " ");
+            System.out.print(RESET_BG_COLOR + SET_TEXT_COLOR_WHITE + " " + row + " ");
             for(int col = startCol; whitePerspective ? col <= endCol : col >= endCol; col += colStep) {
-                boolean placeLightSquare = (row + col) % 2 == 0;
-                String squareColor = placeLightSquare ? SET_BG_COLOR_WHITE : SET_BG_COLOR_DARK_GREEN;
+                boolean placeLightSquare = (row + col) % 2 != 0;
+                String squareColor = placeLightSquare ? SET_BG_COLOR_LIGHT_GREY : SET_BG_COLOR_DARK_GREY;
                 System.out.print(squareColor + " " + placePieces(board, row, col));
             }
-            System.out.println(RESET_BG_COLOR + " " + row + " ");
+            System.out.println(RESET_BG_COLOR + SET_TEXT_COLOR_WHITE + " " + row + " ");
         }
-        System.out.print(RESET_BG_COLOR + "   ");
-        for (String col : colLabels) {
-            System.out.print(col);
-        }
+        System.out.print(RESET_BG_COLOR + SET_TEXT_COLOR_WHITE + "     a   b    c    d   e    f    g   h");
     }
     private String placePieces (chess.ChessBoard board, int row, int col) {
         var piece = board.getPiece(new chess.ChessPosition(row, col));
         if (piece == null) {
-            return EMPTY;
+            return " \u2003 ";
         }
         String color;
         boolean isWhite = piece.getTeamColor() == chess.ChessGame.TeamColor.WHITE;
         if(isWhite) {
-            color = SET_TEXT_COLOR_BLUE;
+            color = SET_TEXT_BOLD + SET_TEXT_COLOR_GREEN;
         } else {
-            color = SET_TEXT_COLOR_RED;
+            color = SET_TEXT_BOLD + SET_TEXT_COLOR_RED;
         }
         return color + switch(piece.getPieceType()) {
             case KING -> isWhite ? WHITE_KING : BLACK_KING;
