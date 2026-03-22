@@ -154,7 +154,7 @@ public class ChessRepl {
             for(int col = startCol; whitePerspective ? col <= endCol : col >= endCol; col += colStep) {
                 boolean placeLightSquare = (row + col) % 2 == 0;
                 String squareColor = placeLightSquare ? SET_BG_COLOR_WHITE : SET_BG_COLOR_DARK_GREEN;
-                System.out.print(squareColor + " "); //eventually put in the letter for the piece
+                System.out.print(squareColor + " " + placePieces(board, row, col));
             }
             System.out.println(RESET_BG_COLOR + " " + row + " ");
         }
@@ -162,6 +162,28 @@ public class ChessRepl {
         for (String col : colLabels) {
             System.out.print(col);
         }
+    }
+    private String placePieces (chess.ChessBoard board, int row, int col) {
+        var piece = board.getPiece(new chess.ChessPosition(row, col));
+        if (piece == null) {
+            return EMPTY;
+        }
+        String color;
+        boolean isWhite = piece.getTeamColor() == chess.ChessGame.TeamColor.WHITE;
+        if(isWhite) {
+            color = SET_TEXT_COLOR_BLUE;
+        } else {
+            color = SET_TEXT_COLOR_RED;
+        }
+        return color + switch(piece.getPieceType()) {
+            case KING -> isWhite ? WHITE_KING : BLACK_KING;
+            case QUEEN -> isWhite? WHITE_QUEEN: BLACK_QUEEN;
+            case BISHOP -> isWhite ? WHITE_BISHOP : BLACK_BISHOP;
+            case KNIGHT -> isWhite ? WHITE_KNIGHT : BLACK_KNIGHT;
+            case ROOK -> isWhite ? WHITE_ROOK : BLACK_ROOK;
+            case PAWN -> isWhite ? WHITE_PAWN : BLACK_PAWN;
+        };
+
     }
     public String joinGame(String... params) throws Exception {
         assertSignedIn();
