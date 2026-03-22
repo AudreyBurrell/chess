@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Scanner;
 import com.google.gson.Gson;
 import model.*;
+import chess.ChessGame;
 
 import static ui.EscapeSequences.*;
 
@@ -74,7 +75,7 @@ public class ChessRepl {
         AuthData auth = serverFacade.register(username, password, email);
         authToken = auth.authToken();
         state = State.SIGNEDIN;
-        return "Welcome " + username + "\n";
+        return "Welcome " + username + ". Type 'help' to view commands \n";
     }
     public String login(String... params) throws Exception {
         if(params.length != 2) {
@@ -116,6 +117,52 @@ public class ChessRepl {
         }
         return "Here are the games: \n" + result.toString();
     }
+    private void drawBoard(ChessGame game, String playerColor) {
+        var board = game.getBoard();
+        boolean whitePerspective = !playerColor.equals("BLACK");
+        String[] colLabels;
+        int startRow;
+        int endRow;
+        int rowStep;
+        int startCol;
+        int endCol;
+        int colStep;
+        if(!whitePerspective) {
+            colLabels = new String[]{"h", "g", "f", "e", "d", "c", "b", "a"};
+            startRow = 1;
+            endRow = 8;
+            rowStep = 1;
+            startCol = 8;
+            endCol = 1;
+            colStep = -1;
+        } else {
+            colLabels = new String[]{"a", "b", "c", "d", "e", "f", "g", "h"};
+            startRow = 8;
+            endRow = 1;
+            rowStep = -1;
+            startCol = 1;
+            endCol = 8;
+            colStep = 1;
+        }
+        System.out.print(RESET_BG_COLOR + "   ");
+        for (String col : colLabels) {
+            System.out.print(col);
+        }
+        System.out.println();
+        for(int row = startRow; whitePerspective ? row >= endRow : row <= endRow; row += rowStep) {
+            System.out.print(RESET_BG_COLOR + " " + row + " ");
+            for(int col = startCol; whitePerspective ? col <= endCol : col >= endCol; col += colStep) {
+                boolean placeLightSquare = (row + col) % 2 == 0;
+                String squareColor = placeLightSquare ? SET_BG_COLOR_WHITE : SET_BG_COLOR_DARK_GREEN;
+                System.out.print(squareColor + " "); //eventually put in the letter for the piece
+            }
+            System.out.println(RESET_BG_COLOR + " " + row + " ");
+        }
+        System.out.print(RESET_BG_COLOR + "   ");
+        for (String col : colLabels) {
+            System.out.print(col);
+        }
+    }
     public String joinGame(String... params) throws Exception {
         assertSignedIn();
         if (params.length != 2) {
@@ -138,10 +185,11 @@ public class ChessRepl {
         List<GameData> gamesList = serverFacade.listGames(authToken);
         GameData selectedGame = gamesList.get(gameNumber - 1);
         //drawing the board
-        return "Observing game " + selectedGame.gameName();
+        drawBoard(selectedGame.game(), "WHITE");
+        return "\n Observing game " + selectedGame.gameName();
     }
     public String quit() {
-        return "Quitting...";
+        return "quit";
     }
 
     public String help() {
@@ -169,6 +217,4 @@ public class ChessRepl {
             throw new Exception("You must sign in");
         }
     }
-
-
 }

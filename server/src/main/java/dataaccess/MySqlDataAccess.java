@@ -154,7 +154,11 @@ public class MySqlDataAccess implements DataAccess {
     @Override
     public int createGame(GameData game) throws dataaccess.DataAccessException {
         var statement = "INSERT INTO games (gameName, whiteUsername, blackUsername, game) VALUES (?, ?, ?, ?)";
-        String json = new Gson().toJson(game.game());
+        chess.ChessGame chessGame = game.game();
+        if (chessGame == null) {
+            chessGame = new chess.ChessGame();
+        }
+        String json = new Gson().toJson(chessGame);
         return executeUpdate(statement, game.gameName(), game.whiteUsername(), game.blackUsername(), json);
     }
 
