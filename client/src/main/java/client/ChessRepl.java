@@ -3,7 +3,6 @@ package client;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
-import com.google.gson.Gson;
 import model.*;
 import chess.ChessGame;
 
@@ -31,7 +30,7 @@ public class ChessRepl {
                 if(result == null) {
                     result = "";
                 }
-                System.out.print(SET_TEXT_COLOR_BLUE + result);
+                System.out.print(SET_TEXT_COLOR_MAGENTA + result);
             } catch (Throwable e){
                 var msg = e.toString();
                 System.out.print(msg);
@@ -40,7 +39,7 @@ public class ChessRepl {
         System.out.println();
     }
     private void printPrompt() {
-        System.out.print("\n" + RESET_TEXT_COLOR + ">>> " + SET_TEXT_COLOR_GREEN);
+        System.out.print("\n" + RESET_TEXT_COLOR + ">>> " + SET_TEXT_COLOR_MAGENTA);
     }
     public String eval(String input) {
         try {
@@ -128,7 +127,6 @@ public class ChessRepl {
         int endCol;
         int colStep;
         if(!whitePerspective) {
-            //colLabels = new String[]{"h", "g", "f", "e", "d", "c", "b", "a"};
             startRow = 1;
             endRow = 8;
             rowStep = 1;
@@ -136,7 +134,6 @@ public class ChessRepl {
             endCol = 1;
             colStep = -1;
         } else {
-            //colLabels = new String[]{"a", "b", "c", "d", "e", "f", "g", "h"};
             startRow = 8;
             endRow = 1;
             rowStep = -1;
@@ -144,7 +141,7 @@ public class ChessRepl {
             endCol = 8;
             colStep = 1;
         }
-        System.out.print(RESET_BG_COLOR + SET_TEXT_COLOR_WHITE + "     a   b    c    d   e    f    g   h");
+        System.out.print(RESET_BG_COLOR + SET_TEXT_COLOR_WHITE + "      a     b     c     d     e     f     g     h");
         System.out.println();
         for(int row = startRow; whitePerspective ? row >= endRow : row <= endRow; row += rowStep) {
             System.out.print(RESET_BG_COLOR + SET_TEXT_COLOR_WHITE + " " + row + " ");
@@ -155,27 +152,27 @@ public class ChessRepl {
             }
             System.out.println(RESET_BG_COLOR + SET_TEXT_COLOR_WHITE + " " + row + " ");
         }
-        System.out.print(RESET_BG_COLOR + SET_TEXT_COLOR_WHITE + "     a   b    c    d   e    f    g   h");
+        System.out.print(RESET_BG_COLOR + SET_TEXT_COLOR_WHITE + "      a     b     c     d     e     f     g     h");
     }
     private String placePieces (chess.ChessBoard board, int row, int col) {
         var piece = board.getPiece(new chess.ChessPosition(row, col));
         if (piece == null) {
-            return " \u2003 ";
+            return "     ";
         }
         String color;
         boolean isWhite = piece.getTeamColor() == chess.ChessGame.TeamColor.WHITE;
         if(isWhite) {
             color = SET_TEXT_BOLD + SET_TEXT_COLOR_GREEN;
         } else {
-            color = SET_TEXT_BOLD + SET_TEXT_COLOR_RED;
+            color = SET_TEXT_BOLD + SET_TEXT_COLOR_YELLOW;
         }
         return color + switch(piece.getPieceType()) {
-            case KING -> isWhite ? WHITE_KING : BLACK_KING;
-            case QUEEN -> isWhite? WHITE_QUEEN: BLACK_QUEEN;
-            case BISHOP -> isWhite ? WHITE_BISHOP : BLACK_BISHOP;
-            case KNIGHT -> isWhite ? WHITE_KNIGHT : BLACK_KNIGHT;
-            case ROOK -> isWhite ? WHITE_ROOK : BLACK_ROOK;
-            case PAWN -> isWhite ? WHITE_PAWN : BLACK_PAWN;
+            case KING -> " Ki  ";
+            case QUEEN -> "  Q  ";
+            case BISHOP -> "  B  ";
+            case KNIGHT -> " Kn  ";
+            case ROOK -> "  R  ";
+            case PAWN -> "  P  ";
         };
 
     }
