@@ -114,12 +114,12 @@ public class ChessRepl {
                     .append("\n");
             i++;
         }
-        return "Here are the games: \n" + result.toString();
+        return "Here are the games: \n" + result;
     }
     private void drawBoard(ChessGame game, String playerColor) {
         var board = game.getBoard();
         boolean whitePerspective = !playerColor.equals("BLACK");
-        String[] colLabels;
+        String colLabels;
         int startRow;
         int endRow;
         int rowStep;
@@ -133,6 +133,7 @@ public class ChessRepl {
             startCol = 8;
             endCol = 1;
             colStep = -1;
+            colLabels = "      h     g     f     e     d     c     b     a";
         } else {
             startRow = 8;
             endRow = 1;
@@ -140,8 +141,9 @@ public class ChessRepl {
             startCol = 1;
             endCol = 8;
             colStep = 1;
+            colLabels = "      a     b     c     d     e     f     g     h";
         }
-        System.out.print(RESET_BG_COLOR + SET_TEXT_COLOR_WHITE + "      a     b     c     d     e     f     g     h");
+        System.out.print(RESET_BG_COLOR + SET_TEXT_COLOR_WHITE + colLabels);
         System.out.println();
         for(int row = startRow; whitePerspective ? row >= endRow : row <= endRow; row += rowStep) {
             System.out.print(RESET_BG_COLOR + SET_TEXT_COLOR_WHITE + " " + row + " ");
@@ -152,7 +154,7 @@ public class ChessRepl {
             }
             System.out.println(RESET_BG_COLOR + SET_TEXT_COLOR_WHITE + " " + row + " ");
         }
-        System.out.print(RESET_BG_COLOR + SET_TEXT_COLOR_WHITE + "      a     b     c     d     e     f     g     h");
+        System.out.print(RESET_BG_COLOR + SET_TEXT_COLOR_WHITE + colLabels);
     }
     private String placePieces (chess.ChessBoard board, int row, int col) {
         var piece = board.getPiece(new chess.ChessPosition(row, col));
@@ -187,7 +189,8 @@ public class ChessRepl {
         GameData selectedGame = gamesList.get(gameNumber - 1);
         serverFacade.joinGame(authToken, selectedGame.gameID(), playerColor);
         //drawing the board
-        return "Joined game " + selectedGame.gameName() + " as " + playerColor;
+        drawBoard(selectedGame.game(), playerColor);
+        return "\n Joined game " + selectedGame.gameName() + " as " + playerColor;
     }
     public String observeGame(String... params) throws Exception {
         assertSignedIn();
