@@ -42,14 +42,35 @@ public class Server {
 
 
     }
+    private void handleError(io.javalin.http.Context ctx, DataAccessException error) {
+        String message = error.getMessage();
+        if (message.contains("already taken")) {
+            ctx.status(403);
+            ctx.json("{\"message\": \"Error: color already taken\"}");
+        } else if (message.contains("already exists")) {
+            ctx.status(403);
+            ctx.json("{\"message\": \"Error: already taken\"}");
+        } else if (message.contains("Auth token does not exist")) {
+            ctx.status(401);
+            ctx.json("{\"message\": \"Error: unauthorized\"}");
+        } else if (message.contains("Game does not exist")) {
+            ctx.status(400);
+            ctx.json("{\"message\": \"Error: bad request\"}");
+        } else if (message.contains("does not exist") || message.contains("Incorrect password")) {
+            ctx.status(401);
+            ctx.json("{\"message\": \"Error: unauthorized\"}");
+        } else {
+            ctx.status(500);
+            ctx.json("{\"message\": \"Error: " + message + "\"}");
+        }
+    }
     private void clear(io.javalin.http.Context ctx) {
         try {
             clearService.clearService();
             ctx.status(200);
             ctx.json("{}");
         } catch (DataAccessException error) {
-            ctx.status(500);
-            ctx.json("{\"message\": \"Error: " + error.getMessage() + "\"}");
+            handleError(ctx, error);
         }
     }
     private void register(io.javalin.http.Context ctx) {
@@ -64,13 +85,7 @@ public class Server {
             ctx.status(200);
             ctx.json(new Gson().toJson(auth));
         } catch (DataAccessException error) {
-            if(error.getMessage().contains("already exists")) {
-                ctx.status(403);
-                ctx.json("{\"message\": \"Error: Username already exists\"}");
-            } else {
-                ctx.status(500);
-                ctx.json("{\"message\": \"Error: " + error.getMessage() + "\"}");
-            }
+            handleError(ctx, error);
         }
     }
     private void login(io.javalin.http.Context ctx) {
@@ -85,16 +100,7 @@ public class Server {
             ctx.status(200);
             ctx.json(new Gson().toJson(auth));
         } catch (DataAccessException error) {
-            if(error.getMessage().contains("already exists")) {
-                ctx.status(400);
-                ctx.json("{\"message\": \"Error: Username does not exist\"}");
-            } else if (error.getMessage().contains("does not exist") || error.getMessage().contains("Incorrect password")) {
-                ctx.status(401);
-                ctx.json("{\"message\": \"Error: Unauthorized\"}");
-            } else {
-                ctx.status(500);
-                ctx.json("{\"message\": \"Error: " + error.getMessage() + "\"}");
-            }
+            handleError(ctx, error);
         }
     }
     private void logout(io.javalin.http.Context ctx) {
@@ -109,13 +115,7 @@ public class Server {
             ctx.status(200);
             ctx.json("{}");
         } catch (DataAccessException error) {
-            if(error.getMessage().contains("does not exist")) {
-                ctx.status(401);
-                ctx.json("{\"message\": \"Error: unauthorized\"}");
-            } else {
-                ctx.status(500);
-                ctx.json("{\"message\": \"Error: " + error.getMessage() + "\"}");
-            }
+            handleError(ctx, error);
         }
     }
     private void createGame(io.javalin.http.Context ctx) {
@@ -137,13 +137,7 @@ public class Server {
             ctx.status(200);
             ctx.json("{\"gameID\": " + gameID + "}");
         } catch (DataAccessException error) {
-            if(error.getMessage().contains("Auth token does not exist")) {
-                ctx.status(401);
-                ctx.json("{\"message\": \"Error: unauthorized\"}");
-            } else {
-                ctx.status(500);
-                ctx.json("{\"message\": \"Error: " + error.getMessage() + "\"}");
-            }
+            handleError(ctx, error);
         }
     }
     private void joinGame(io.javalin.http.Context ctx) {
@@ -165,19 +159,7 @@ public class Server {
             ctx.status(200);
             ctx.json("{}");
         } catch (DataAccessException error) {
-            if(error.getMessage().contains("already taken")) {
-                ctx.status(403);
-                ctx.json("{\"message\": \"Error: color already taken\"}");
-            } else if(error.getMessage().contains("Game does not exist")) {
-                ctx.status(400);
-                ctx.json("{\"message\": \"Error: bad request\"}");
-            }else if(error.getMessage().contains("does not exist")) {
-                ctx.status(401);
-                ctx.json("{\"message\": \"Error: unauthorized\"}");
-            } else {
-                ctx.status(500);
-                ctx.json("{\"message\": \"Error: " + error.getMessage() + "\"}");
-            }
+            handleError(ctx, error);
         }
     }
     private void listGames(io.javalin.http.Context ctx) {
@@ -192,16 +174,8 @@ public class Server {
             ctx.status(200);
             ctx.json(new Gson().toJson(Map.of("games", gamesList)));
         } catch (DataAccessException error) {
-            if(error.getMessage().contains("does not exist")) {
-                ctx.status(401);
-                ctx.json("{\"message\": \"Error: unauthorized\"}");
-            } else {
-                ctx.status(500);
-                ctx.json("{\"message\": \"Error: " + error.getMessage() + "\"}");
-            }
-
+            handleError(ctx, error);
         }
-
     }
 
 
