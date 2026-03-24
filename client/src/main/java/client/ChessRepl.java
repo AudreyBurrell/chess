@@ -99,7 +99,7 @@ public class ChessRepl {
             return "Expected: <GAME NAME>";
         }
         int gameID = serverFacade.createGame(authToken, params[0]);
-        return "You have created " + params[0] + " with ID = " + gameID;
+        return "You have created " + params[0];
     }
     public String listGames() throws Exception {
         assertSignedIn();
@@ -183,9 +183,20 @@ public class ChessRepl {
         if (params.length != 2) {
             return "Expected: <ID> <WHITE or BLACK>";
         }
-        int gameNumber = Integer.parseInt(params[0]);
+        int gameNumber;
+        try {
+            gameNumber = Integer.parseInt(params[0]);
+        } catch (NumberFormatException error) {
+            return "<ID> must be a number";
+        }
         String playerColor = params[1].toUpperCase();
+        if(!playerColor.equals("WHITE") && !playerColor.equals("BLACK")) {
+            return "Color must be WHITE or BLACK";
+        }
         List<GameData> gamesList = serverFacade.listGames(authToken);
+        if(gameNumber < 1 || gameNumber > gamesList.size()) {
+            return "Game at index " + gameNumber + " does not exist.";
+        }
         GameData selectedGame = gamesList.get(gameNumber - 1);
         serverFacade.joinGame(authToken, selectedGame.gameID(), playerColor);
         //drawing the board

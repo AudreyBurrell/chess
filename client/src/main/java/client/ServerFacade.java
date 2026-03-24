@@ -132,17 +132,19 @@ public class ServerFacade {
         var status = response.statusCode();
         if (!isSuccessful(status)) {
             var body = response.body();
-            if (body != null) {
-                throw new Exception(body);
+//            if (body != null) {
+//                throw new Exception(body);
+//            }
+            if(body.contains("message")) {
+                int start = body.indexOf(": \"") + 3;
+                int end = body.lastIndexOf("\"");
+                throw new Exception(body.substring(start, end));
             }
-
             throw new Exception("other failure: " + status);
         }
-
         if (responseClass != null) {
             return new Gson().fromJson(response.body(), responseClass);
         }
-
         return null;
     }
 
