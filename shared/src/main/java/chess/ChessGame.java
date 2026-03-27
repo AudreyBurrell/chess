@@ -123,6 +123,20 @@ public class ChessGame {
      * @param teamColor which team to check for check
      * @return True if the specified team is in check
      */
+
+    private boolean isThreateningKing(ChessPiece testingPiece, ChessPosition testingPosition,
+                                      ChessPosition kingPosition, TeamColor teamColor) {
+        if (testingPiece == null || testingPiece.getTeamColor() == teamColor) {
+            return false;
+        }
+        Collection<ChessMove> opponentMoves = testingPiece.pieceMoves(board, testingPosition);
+        for (ChessMove move : opponentMoves) {
+            if (move.getEndPosition().equals(kingPosition)) {
+                return true;
+            }
+        }
+        return false;
+    }
     public boolean isInCheck(TeamColor teamColor) {
 //        throw new RuntimeException("Not implemented");
         ChessPosition kingPosition = null;
@@ -140,13 +154,8 @@ public class ChessGame {
             for(int col = 1; col <= 8; col++) {
                 ChessPosition testingPosition = new ChessPosition(row, col);
                 ChessPiece testingPiece = board.getPiece(testingPosition);
-                if(testingPiece != null && testingPiece.getTeamColor() != teamColor) {
-                    Collection<ChessMove> opponentMoves = testingPiece.pieceMoves(board, testingPosition);
-                    for(ChessMove move : opponentMoves) {
-                        if(move.getEndPosition().equals(kingPosition)) {
-                            return true;
-                        }
-                    }
+                if(isThreateningKing(testingPiece, testingPosition, kingPosition, teamColor)) {
+                    return true;
                 }
             }
         }

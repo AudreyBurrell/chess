@@ -219,7 +219,9 @@ public class ChessPiece {
         return promotionMoves;
     }
 
-    private void addForwardMoves(List<ChessMove> pawnMoves, ChessBoard board, ChessPosition myPosition, ChessPosition oneForwardPosition, ChessPosition twoForwardPositionWhite, ChessPosition twoForwardPositionBlack, boolean firstMove) {
+    private void addForwardMoves(List<ChessMove> pawnMoves, ChessBoard board, ChessPosition myPosition,
+                                 ChessPosition oneForwardPosition, ChessPosition twoForwardPositionWhite,
+                                 ChessPosition twoForwardPositionBlack, boolean firstMove) {
         ChessPiece pieceAhead = board.getPiece(oneForwardPosition);
         if (pieceAhead != null) {
             return;

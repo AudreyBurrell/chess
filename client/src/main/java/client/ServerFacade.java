@@ -132,9 +132,6 @@ public class ServerFacade {
         var status = response.statusCode();
         if (!isSuccessful(status)) {
             var body = response.body();
-//            if (body != null) {
-//                throw new Exception(body);
-//            }
             if(body.contains("message")) {
                 int start = body.indexOf(": \"") + 3;
                 int end = body.lastIndexOf("\"");
