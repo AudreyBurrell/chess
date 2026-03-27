@@ -210,6 +210,9 @@ public class ChessRepl {
         }
         int gameNumber = Integer.parseInt(params[0]);
         List<GameData> gamesList = serverFacade.listGames(authToken);
+        if(gameNumber < 1 || gameNumber > gamesList.size()) {
+            return "Game at index " + gameNumber + " does not exist.";
+        }
         GameData selectedGame = gamesList.get(gameNumber - 1);
         //drawing the board
         drawBoard(selectedGame.game(), "WHITE");

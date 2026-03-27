@@ -219,6 +219,66 @@ public class ChessPiece {
         return promotionMoves;
     }
 
+    private void addForwardMoves(List<ChessMove> pawnMoves, ChessBoard board, ChessPosition myPosition, ChessPosition oneForwardPosition, ChessPosition twoForwardPositionWhite, ChessPosition twoForwardPositionBlack, boolean firstMove) {
+        ChessPiece pieceAhead = board.getPiece(oneForwardPosition);
+        if (pieceAhead != null) {
+            return;
+        }
+        if (pieceColor == ChessGame.TeamColor.WHITE) {
+            if (oneForwardPosition.getRow() == 8) {
+                pawnMoves.addAll(promotionMoves(myPosition, oneForwardPosition));
+            } else {
+                pawnMoves.add(new ChessMove(myPosition, oneForwardPosition, null));
+            }
+            if (firstMove && board.getPiece(twoForwardPositionWhite) == null) {
+                pawnMoves.add(new ChessMove(myPosition, twoForwardPositionWhite, null));
+            }
+        }
+        if (pieceColor == ChessGame.TeamColor.BLACK) {
+            if (oneForwardPosition.getRow() == 1) {
+                pawnMoves.addAll(promotionMoves(myPosition, oneForwardPosition));
+            } else {
+                pawnMoves.add(new ChessMove(myPosition, oneForwardPosition, null));
+            }
+            if (firstMove && board.getPiece(twoForwardPositionBlack) == null) {
+                pawnMoves.add(new ChessMove(myPosition, twoForwardPositionBlack, null));
+            }
+        }
+    }
+
+    private void addDiagonalCaptures(List<ChessMove> pawnMoves, ChessBoard board, ChessPosition myPosition,
+                                     int currentRow, int currentCol) {
+        int[][] directions;
+        if (pieceColor == ChessGame.TeamColor.WHITE) {
+            directions = new int[][] {
+                    {1, -1}, {1,1}
+            };
+        } else {
+            directions = new int[][] {
+                    {-1, -1}, {-1,1}
+            };
+        }
+        for(int[] directionTest : directions) {
+            int suggestedRow = directionTest[0];
+            int suggestedCol = directionTest[1];
+            int newRow = currentRow + suggestedRow;
+            int newCol = currentCol + suggestedCol;
+            if (newRow < 1 || newRow > 8 || newCol < 1 || newCol > 8) {
+                continue;
+            }
+            ChessPosition newPosition = new ChessPosition(newRow, newCol);
+            ChessPiece targetPiece = board.getPiece(newPosition);
+            if (targetPiece != null && targetPiece.getTeamColor() != pieceColor) {
+                if((pieceColor == ChessGame.TeamColor.WHITE && newRow == 8) ||
+                        (pieceColor == ChessGame.TeamColor.BLACK && newRow == 1)) {
+                    pawnMoves.addAll(promotionMoves(myPosition, newPosition));
+                } else {
+                    pawnMoves.add(new ChessMove(myPosition, newPosition, null));
+                }
+            }
+        }
+    }
+
     private Collection<ChessMove> pawnMoves(ChessBoard board, ChessPosition myPosition){
         //need to add promotion stuff somewhere
         List<ChessMove> pawnMoves = new ArrayList<>();
@@ -239,65 +299,10 @@ public class ChessPiece {
             ChessPosition twoForwardPositionWhite = new ChessPosition(oneForward+1, currentCol);
             ChessPosition twoForwardPositionBlack = new ChessPosition(oneForward - 1, currentCol);
             ChessPiece pieceAhead = board.getPiece(oneForwardPosition);
-            if (pieceAhead == null){
-                //check for promotion
-                if (pieceColor == ChessGame.TeamColor.WHITE) {
-                    if (oneForwardPosition.getRow() == 8) {
-                        //promote
-                        pawnMoves.addAll(promotionMoves(myPosition, oneForwardPosition));
-                    } else {
-                        //don't promote
-                        pawnMoves.add(new ChessMove(myPosition, oneForwardPosition, null));
-                    }
-                    //Chceking if first move and adding the two forward option
-                    if (firstMove) {
-                        if (board.getPiece(twoForwardPositionWhite) == null && board.getPiece(oneForwardPosition) == null) {
-                            pawnMoves.add(new ChessMove(myPosition, twoForwardPositionWhite, null));
-                        }
-                    }
-                }
-                if (pieceColor == ChessGame.TeamColor.BLACK) {
-                    if(oneForwardPosition.getRow() == 1) {
-                        pawnMoves.addAll(promotionMoves(myPosition, oneForwardPosition));
-                    } else {
-                        pawnMoves.add(new ChessMove(myPosition, oneForwardPosition, null));
-                    }
-                    if(firstMove){
-                        if(board.getPiece(twoForwardPositionBlack) == null && board.getPiece(oneForwardPosition) == null) {
-                            pawnMoves.add(new ChessMove(myPosition, twoForwardPositionBlack, null));
-                        }
-                    }
-                }
-            }
+            addForwardMoves(pawnMoves, board, myPosition, oneForwardPosition, twoForwardPositionWhite,
+                    twoForwardPositionBlack, firstMove);
             //step 3: diagonal captures
-            int[][] directions;
-            if (pieceColor == ChessGame.TeamColor.WHITE) {
-                directions = new int[][] {
-                        {1,-1}, {1,1}
-                };
-            } else {
-                directions = new int[][] {
-                        {-1,-1}, {-1,1}
-                };
-            }
-            for(int[] directionTest : directions) {
-                int suggestedRow = directionTest[0];
-                int suggestedCol = directionTest[1];
-                int newRow = currentRow + suggestedRow;
-                int newCol = currentCol + suggestedCol;
-                if (newRow >= 1 && newRow <= 8 && newCol >= 1 && newCol <= 8){
-                    ChessPosition newPosition = new ChessPosition(newRow, newCol);
-                    ChessPiece targetPiece = board.getPiece(newPosition);
-                    if (targetPiece != null && targetPiece.getTeamColor() != pieceColor) {
-                        if((pieceColor == ChessGame.TeamColor.WHITE && newRow == 8) || (pieceColor == ChessGame.TeamColor.BLACK && newRow == 1)) {
-                            pawnMoves.addAll(promotionMoves(myPosition, newPosition));
-                        } else {
-                            pawnMoves.add(new ChessMove(myPosition, newPosition, null));
-                        }
-                    }
-                }
-            }
-
+            addDiagonalCaptures(pawnMoves, board, myPosition, currentRow, currentCol);
         }
 
         return pawnMoves;
