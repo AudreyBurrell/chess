@@ -3,13 +3,20 @@ package server.websocket;
 import com.google.gson.Gson;
 import io.javalin.Javalin;
 import io.javalin.websocket.*;
+import model.AuthData;
+import model.GameData;
 import org.jetbrains.annotations.NotNull;
 import service.*;
 import org.eclipse.jetty.websocket.api.Session;
 import websocket.commands.UserGameCommand;
 import websocket.messages.ServerMessage;
 
+import java.io.IOException;
+
 public class ChessWebsocketHandler implements WsConnectHandler, WsMessageHandler, WsCloseHandler {
+
+    private final ConnectionManager connections = new ConnectionManager();
+
     @Override
     public void handleClose(@NotNull WsCloseContext wsCloseContext) throws Exception {
         System.out.println("Websocket closed.");
@@ -32,29 +39,24 @@ public class ChessWebsocketHandler implements WsConnectHandler, WsMessageHandler
         }
     }
 
-    private void connect(WsMessageContext ctx, UserGameCommand command) {
+    private void connect(WsMessageContext ctx, UserGameCommand command) throws IOException {
+        try {
 
+        } catch (Exception e) {
+
+        }
     }
 
     private void makeMove(WsMessageContext ctx, UserGameCommand command) {
 
     }
 
-    private void leave(WsMessageContext ctx, UserGameCommand command) {
+    private void leave(WsMessageContext ctx, UserGameCommand command) throws IOException {
 
     }
 
     private void resign(WsMessageContext ctx, UserGameCommand command) {
 
     }
-
-
-
-//    private final Javalin httpHandler;
-//    private final ChessWebsocketHandler webSocketHandler;
-//    private final UserService userService;
-//    private final GameService gameService;
-//    private final ClearService clearService;
-
 
 }
