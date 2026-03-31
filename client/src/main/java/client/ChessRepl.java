@@ -5,16 +5,20 @@ import java.util.List;
 import java.util.Scanner;
 import model.*;
 import chess.ChessGame;
+import client.websocket.NotificationHandler;
+import client.websocket.WebSocketFacade;
 
 import static ui.EscapeSequences.*;
 
-public class ChessRepl {
+public class ChessRepl implements client.websocket.NotificationHandler {
     private String authToken = null;
     private final ServerFacade serverFacade;
     private State state = State.SIGNEDOUT;
+    private client.websocket.WebSocketFacade ws;
 
     public ChessRepl(int port) {
         serverFacade = new ServerFacade(port);
+
     }
     public void run() {
         System.out.println("Welcome to Chess.");
@@ -199,6 +203,8 @@ public class ChessRepl {
         }
         GameData selectedGame = gamesList.get(gameNumber - 1);
         serverFacade.joinGame(authToken, selectedGame.gameID(), playerColor);
+        //TESTING TO SEE IF WEBSOCKET CONNECTS:
+        ws = new client.websocket.WebSocketFacade("http://localhost:" + 8080, this);
         //drawing the board
         drawBoard(selectedGame.game(), playerColor);
         return "\n Joined game " + selectedGame.gameName() + " as " + playerColor;
@@ -246,5 +252,11 @@ public class ChessRepl {
         if (state == State.SIGNEDOUT) {
             throw new Exception("You must sign in");
         }
+    }
+
+    @Override
+    public void notify(websocket.messages.ServerMessage notification) {
+        System.out.println(SET_TEXT_COLOR_RED + notification.getServerMessageType());
+        printPrompt();
     }
 }
