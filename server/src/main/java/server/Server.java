@@ -6,6 +6,7 @@ import dataaccess.MySqlDataAccess;
 import io.javalin.*;
 import model.GameData;
 import model.UserData;
+import server.websocket.ChessWebsocketHandler;
 import service.ClearService;
 import service.GameService;
 import service.UserService;
@@ -13,15 +14,20 @@ import service.UserService;
 import java.util.List;
 import java.util.Map;
 
+
 public class Server {
 
     private final Javalin javalin;
     private final UserService userService;
     private final GameService gameService;
     private final ClearService clearService;
+    private final ChessWebsocketHandler webSocketHandler;
 
     public Server() {
+        webSocketHandler = new ChessWebsocketHandler();
+
         javalin = Javalin.create(config -> config.staticFiles.add("web"));
+
         try {
             var dataAccess = new MySqlDataAccess();
             userService = new UserService(dataAccess);
@@ -31,7 +37,6 @@ public class Server {
             throw new RuntimeException(e);
         }
 
-        // Register your endpoints and exception handlers here.
         javalin.delete("/db", this::clear);
         javalin.post("/user", this::register);
         javalin.post("/session", this::login);
@@ -39,8 +44,11 @@ public class Server {
         javalin.get("/game", this::listGames);
         javalin.post("/game", this::createGame);
         javalin.put("/game", this::joinGame);
-
-
+        javalin.ws("/ws", ws -> {
+            ws.onConnect(webSocketHandler);
+            ws.onMessage(webSocketHandler);
+            ws.onClose(webSocketHandler);
+        });
     }
     private void handleError(io.javalin.http.Context ctx, DataAccessException error) {
         String message = error.getMessage();
