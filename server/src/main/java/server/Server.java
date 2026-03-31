@@ -24,8 +24,6 @@ public class Server {
     private final ChessWebsocketHandler webSocketHandler;
 
     public Server() {
-        webSocketHandler = new ChessWebsocketHandler();
-
         javalin = Javalin.create(config -> config.staticFiles.add("web"));
 
         try {
@@ -33,6 +31,7 @@ public class Server {
             userService = new UserService(dataAccess);
             gameService = new GameService(dataAccess);
             clearService = new ClearService(dataAccess);
+            webSocketHandler = new ChessWebsocketHandler(dataAccess);
         } catch (DataAccessException e) {
             throw new RuntimeException(e);
         }
