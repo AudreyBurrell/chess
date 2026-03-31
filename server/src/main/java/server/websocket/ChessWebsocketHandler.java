@@ -7,6 +7,7 @@ import org.jetbrains.annotations.NotNull;
 import service.*;
 import org.eclipse.jetty.websocket.api.Session;
 import websocket.commands.UserGameCommand;
+import websocket.messages.ServerMessage;
 
 public class ChessWebsocketHandler implements WsConnectHandler, WsMessageHandler, WsCloseHandler {
     @Override
