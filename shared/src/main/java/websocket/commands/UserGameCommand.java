@@ -41,6 +41,8 @@ public class UserGameCommand {
         return gameID;
     }
 
+
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
