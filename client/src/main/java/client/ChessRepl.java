@@ -18,7 +18,6 @@ public class ChessRepl implements client.websocket.NotificationHandler {
 
     public ChessRepl(int port) {
         serverFacade = new ServerFacade(port);
-
     }
     public void run() {
         System.out.println("Welcome to Chess.");
@@ -203,8 +202,8 @@ public class ChessRepl implements client.websocket.NotificationHandler {
         }
         GameData selectedGame = gamesList.get(gameNumber - 1);
         serverFacade.joinGame(authToken, selectedGame.gameID(), playerColor);
-        //TESTING TO SEE IF WEBSOCKET CONNECTS:
-        ws = new client.websocket.WebSocketFacade("http://localhost:" + 8080, this);
+        ws = new client.websocket.WebSocketFacade("http://localhost:8080", this);
+        ws.connect(authToken, selectedGame.gameID());
         //drawing the board
         drawBoard(selectedGame.game(), playerColor);
         return "\n Joined game " + selectedGame.gameName() + " as " + playerColor;
@@ -220,6 +219,8 @@ public class ChessRepl implements client.websocket.NotificationHandler {
             return "Game at index " + gameNumber + " does not exist.";
         }
         GameData selectedGame = gamesList.get(gameNumber - 1);
+        ws = new client.websocket.WebSocketFacade("http://localhost:8080", this);
+        ws.connect(authToken, selectedGame.gameID());
         //drawing the board
         drawBoard(selectedGame.game(), "WHITE");
         return "\n Observing game " + selectedGame.gameName();
