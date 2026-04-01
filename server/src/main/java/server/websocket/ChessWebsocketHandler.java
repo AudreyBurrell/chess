@@ -136,9 +136,32 @@ public class ChessWebsocketHandler implements WsConnectHandler, WsMessageHandler
         }
     }
 
-
     private void leave(WsMessageContext ctx, UserGameCommand command) throws IOException {
-
+        try {
+            ValidatedData data = validate(ctx, command);
+            if (data == null) {
+                return;
+            }
+            GameData gameData = data.gameData();
+            int gameID = gameData.gameID();
+            AuthData auth = data.auth();
+            //making the white/black part of game data null
+            String username = auth.username();
+            String whiteUsername = gameData.whiteUsername();
+            String blackUsername = gameData.blackUsername();
+            if (username.equals(gameData.whiteUsername())) {
+                whiteUsername = null;
+            } else if (username.equals(gameData.blackUsername())) {
+                blackUsername = null;
+            }
+            GameData updatedGame = new GameData(gameID, whiteUsername, blackUsername, gameData.gameName(), gameData.game());
+            dataAccess.updateGame(updatedGame);
+            connections.remove(gameID, ctx.session);
+            String notification = auth.username() + " has left game.";
+            connections.broadcast(gameID, null, new NotificationMessage(notification));
+        } catch (Exception e) {
+            ctx.send(new Gson().toJson(new ErrorMessage("Error: " + e.getMessage())));
+        }
     }
 
     private void resign(WsMessageContext ctx, UserGameCommand command) {

@@ -46,6 +46,10 @@ public class WebSocketFacade extends Endpoint {
         var command = new MakeMoveCommand(authToken, gameID, move);
         session.getBasicRemote().sendText(new Gson().toJson(command));
     }
+    public void leave(String authToken, int gameID) throws Exception {
+        var command = new UserGameCommand(UserGameCommand.CommandType.LEAVE, authToken, gameID);
+        session.getBasicRemote().sendText(new Gson().toJson(command));
+    }
 
     //DON'T DELETE THIS
     @Override
