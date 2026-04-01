@@ -1,5 +1,7 @@
 package server.websocket;
 
+import chess.ChessGame;
+import chess.ChessMove;
 import com.google.gson.Gson;
 import io.javalin.Javalin;
 import io.javalin.websocket.*;
@@ -8,6 +10,7 @@ import model.GameData;
 import org.jetbrains.annotations.NotNull;
 import service.*;
 import org.eclipse.jetty.websocket.api.Session;
+import websocket.commands.MakeMoveCommand;
 import websocket.commands.UserGameCommand;
 import websocket.messages.ErrorMessage;
 import websocket.messages.LoadGameMessage;
@@ -81,7 +84,41 @@ public class ChessWebsocketHandler implements WsConnectHandler, WsMessageHandler
     }
 
     private void makeMove(WsMessageContext ctx, UserGameCommand command) {
-
+        try {
+            String authToken = command.getAuthToken();
+            int gameID = command.getGameID();
+            AuthData auth = dataAccess.getAuth(authToken);
+            if (auth == null) {
+                ctx.send(new Gson().toJson(new ErrorMessage("Error: unauthorized")));
+                return;
+            }
+            GameData game = dataAccess.getGame(gameID);
+            if (game == null) {
+                ctx.send(new Gson().toJson(new ErrorMessage("Error: game not found")));
+                return;
+            }
+            MakeMoveCommand makeMoveCommand = new Gson().fromJson(ctx.message(), MakeMoveCommand.class);
+            ChessMove move = makeMoveCommand.getMove();
+            ChessGame chessGame = game.game();
+            chessGame.makeMove(move);
+            GameData updatedGame = new GameData(game.gameID(), game.whiteUsername(), game.blackUsername(), game.gameName(), chessGame);
+            dataAccess.updateGame(updatedGame);
+            connections.broadcast(gameID, null, new LoadGameMessage(chessGame));
+            String notification = auth.username() + " moved " + move.toString();
+            connections.broadcast(gameID, ctx.session, new NotificationMessage(notification));
+            ChessGame.TeamColor opponentColor = chessGame.getTeamTurn();
+            if (chessGame.isInCheckmate(opponentColor)) {
+                connections.broadcast(gameID, null, new NotificationMessage(auth.username() + " has put " + opponentColor + " in checkmate!"));
+            } else if (chessGame.isInStalemate(opponentColor)) {
+                connections.broadcast(gameID, null, new NotificationMessage("Stalemate"));
+            } else if (chessGame.isInCheck(opponentColor)) {
+                connections.broadcast(gameID, null, new NotificationMessage(opponentColor + " is in check"));
+            }
+        } catch (chess.InvalidMoveException e) {
+            ctx.send(new Gson().toJson(new ErrorMessage("Error: invalid move " + e.getMessage())));
+        } catch (Exception e) {
+            ctx.send(new Gson().toJson(new ErrorMessage("Error: " + e.getMessage())));
+        }
     }
 
     private void leave(WsMessageContext ctx, UserGameCommand command) throws IOException {
