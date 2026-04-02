@@ -2,6 +2,7 @@ package server.websocket;
 
 import chess.ChessGame;
 import chess.ChessMove;
+import chess.InvalidMoveException;
 import com.google.gson.Gson;
 import io.javalin.Javalin;
 import io.javalin.websocket.*;
@@ -111,9 +112,13 @@ public class ChessWebsocketHandler implements WsConnectHandler, WsMessageHandler
                 ctx.send(new Gson().toJson(new ErrorMessage("Error: wrong player turn")));
                 return;
             }
+            if (gameData.game().isOver()) {
+                ctx.send(new Gson().toJson(new ErrorMessage("Error: game is over")));
+                return;
+            }
+            ChessGame chessGame = gameData.game();
             MakeMoveCommand makeMoveCommand = new Gson().fromJson(ctx.message(), MakeMoveCommand.class);
             ChessMove move = makeMoveCommand.getMove();
-            ChessGame chessGame = gameData.game();
             chessGame.makeMove(move);
             GameData updatedGame = new GameData(gameData.gameID(), gameData.whiteUsername(),
                     gameData.blackUsername(), gameData.gameName(), chessGame);
@@ -136,7 +141,7 @@ public class ChessWebsocketHandler implements WsConnectHandler, WsMessageHandler
         }
     }
 
-    private void leave(WsMessageContext ctx, UserGameCommand command) throws IOException {
+    private void leave(WsMessageContext ctx, UserGameCommand command) throws InvalidMoveException {
         try {
             ValidatedData data = validate(ctx, command);
             if (data == null) {
@@ -164,8 +169,31 @@ public class ChessWebsocketHandler implements WsConnectHandler, WsMessageHandler
         }
     }
 
-    private void resign(WsMessageContext ctx, UserGameCommand command) {
-
+    private void resign(WsMessageContext ctx, UserGameCommand command) throws Exception {
+        try {
+            ValidatedData data = validate(ctx, command);
+            if (data == null) {
+                return;
+            }
+            GameData gameData = data.gameData();
+            int gameID = gameData.gameID();
+            AuthData auth = data.auth();
+            String username = auth.username();
+            String winnerUsername;
+            if (username.equals(gameData.whiteUsername())) {
+                winnerUsername = gameData.blackUsername();
+            } else {
+                winnerUsername = gameData.whiteUsername();
+            }
+            ChessGame chessGame = gameData.game();
+            chessGame.setOver(true);
+            GameData updatedGame = new GameData(gameData.gameID(), gameData.whiteUsername(), gameData.blackUsername(), gameData.gameName(), chessGame);
+            dataAccess.updateGame(updatedGame);
+            String notification = username + " has resigned. " + winnerUsername + " has won the game.";
+            connections.broadcast(gameID, null, new NotificationMessage(notification));
+        } catch (Exception e) {
+            ctx.send(new Gson().toJson(new ErrorMessage("Error: " + e.getMessage())));
+        }
     }
 
 }

@@ -14,6 +14,8 @@ import java.util.Objects;
 public class ChessGame {
     ChessBoard board;
     TeamColor teamTurn;
+    private boolean isOver = false;
+
     public ChessGame() {
         this.board = new ChessBoard();
         this.board.resetBoard();
@@ -44,6 +46,13 @@ public class ChessGame {
     public enum TeamColor {
         WHITE,
         BLACK
+    }
+
+    public boolean isOver() {
+        return isOver;
+    }
+    public void setOver(boolean over) {
+        isOver = over;
     }
 
     /**
