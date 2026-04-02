@@ -128,7 +128,8 @@ public class ChessWebsocketHandler implements WsConnectHandler, WsMessageHandler
             connections.broadcast(gameID, ctx.session, new NotificationMessage(notification));
             ChessGame.TeamColor opponentColor = chessGame.getTeamTurn();
             if (chessGame.isInCheckmate(opponentColor)) {
-                connections.broadcast(gameID, null, new NotificationMessage(auth.username() + " has put " + opponentColor + " in checkmate!"));
+                connections.broadcast(gameID, null, new NotificationMessage(auth.username() +
+                        " has put " + opponentColor + " in checkmate!"));
             } else if (chessGame.isInStalemate(opponentColor)) {
                 connections.broadcast(gameID, null, new NotificationMessage("Stalemate"));
             } else if (chessGame.isInCheck(opponentColor)) {
@@ -176,9 +177,17 @@ public class ChessWebsocketHandler implements WsConnectHandler, WsMessageHandler
                 return;
             }
             GameData gameData = data.gameData();
+            if (gameData.game().isOver()) {
+                ctx.send(new Gson().toJson(new ErrorMessage("Error: game is already over")));
+                return;
+            }
             int gameID = gameData.gameID();
             AuthData auth = data.auth();
             String username = auth.username();
+            if (!username.equals(gameData.whiteUsername()) && !username.equals(gameData.blackUsername())) {
+                ctx.send(new Gson().toJson(new ErrorMessage("Error: only players can resign")));
+                return;
+            }
             String winnerUsername;
             if (username.equals(gameData.whiteUsername())) {
                 winnerUsername = gameData.blackUsername();
@@ -187,7 +196,8 @@ public class ChessWebsocketHandler implements WsConnectHandler, WsMessageHandler
             }
             ChessGame chessGame = gameData.game();
             chessGame.setOver(true);
-            GameData updatedGame = new GameData(gameData.gameID(), gameData.whiteUsername(), gameData.blackUsername(), gameData.gameName(), chessGame);
+            GameData updatedGame = new GameData(gameData.gameID(), gameData.whiteUsername(),
+                    gameData.blackUsername(), gameData.gameName(), chessGame);
             dataAccess.updateGame(updatedGame);
             String notification = username + " has resigned. " + winnerUsername + " has won the game.";
             connections.broadcast(gameID, null, new NotificationMessage(notification));

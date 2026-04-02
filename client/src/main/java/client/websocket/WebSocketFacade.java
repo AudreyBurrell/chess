@@ -50,6 +50,10 @@ public class WebSocketFacade extends Endpoint {
         var command = new UserGameCommand(UserGameCommand.CommandType.LEAVE, authToken, gameID);
         session.getBasicRemote().sendText(new Gson().toJson(command));
     }
+    public void resign(String authToken, int gameID) throws Exception {
+        var command = new UserGameCommand(UserGameCommand.CommandType.RESIGN, authToken, gameID);
+        session.getBasicRemote().sendText(new Gson().toJson(command));
+    }
 
     //DON'T DELETE THIS
     @Override
