@@ -67,6 +67,7 @@ public class ChessRepl implements client.websocket.NotificationHandler {
                 case "observe" -> observeGame(params);
                 case "quit" -> quit();
                 //need to add cases for move, highlight, redraw, leave, resign, help---------------------------------
+                case "redraw" -> redraw();
                 default -> help();
             };
         } catch (Exception e) {
@@ -243,6 +244,11 @@ public class ChessRepl implements client.websocket.NotificationHandler {
     }
     public String quit() {
         return "quit";
+    }
+
+    public String redraw() {
+        drawBoard(currentGame, currentPlayerColor);
+        return "\n Board redrawn";
     }
 
     public String help() {
