@@ -21,6 +21,7 @@ public class ChessRepl implements client.websocket.NotificationHandler {
     private String currentPlayerColor; //stores the user's player color
     private String currentUsername;
     private String currentGameRole = "";
+    private int currentGameID;
 
     public ChessRepl(int port) throws Exception {
         serverFacade = new ServerFacade(port);
@@ -68,6 +69,7 @@ public class ChessRepl implements client.websocket.NotificationHandler {
                 case "quit" -> quit();
                 //need to add cases for move, highlight, redraw, leave, resign, help---------------------------------
                 case "redraw" -> redraw();
+                case "leave" -> leave();
                 default -> help();
             };
         } catch (Exception e) {
@@ -220,6 +222,7 @@ public class ChessRepl implements client.websocket.NotificationHandler {
         currentGame = selectedGame.game();
         currentPlayerColor = playerColor;
         currentGameRole = "player";
+        currentGameID = selectedGame.gameID();
         //updating the user's state to 'INGAME'
         state = State.INGAME;
         return "\n Joined game " + selectedGame.gameName() + " as " + playerColor;
@@ -238,6 +241,8 @@ public class ChessRepl implements client.websocket.NotificationHandler {
         //ws = new client.websocket.WebSocketFacade("http://localhost:8080", this);
         ws.connect(authToken, selectedGame.gameID());
         currentGameRole = "observer";
+        currentPlayerColor = "white";
+        currentGameID = selectedGame.gameID();
         //drawing the board
         drawBoard(selectedGame.game(), "WHITE");
         return "\n Observing game " + selectedGame.gameName();
@@ -246,9 +251,19 @@ public class ChessRepl implements client.websocket.NotificationHandler {
         return "quit";
     }
 
-    public String redraw() {
+    public String redraw() throws Exception {
+        assertInGame();
         drawBoard(currentGame, currentPlayerColor);
         return "\n Board redrawn";
+    }
+
+    public String leave() throws Exception {
+        assertInGame();
+        ws.leave(authToken, currentGameID);
+        currentGame = null;
+        state = State.SIGNEDIN;
+        currentPlayerColor = null;
+        return "Leaving game...";
     }
 
     public String help() {
@@ -283,6 +298,11 @@ public class ChessRepl implements client.websocket.NotificationHandler {
     private void assertSignedIn() throws Exception {
         if (state == State.SIGNEDOUT) {
             throw new Exception("You must sign in");
+        }
+    }
+    private void assertInGame() throws Exception {
+        if (state == State.SIGNEDIN || state == State.SIGNEDOUT) {
+            throw new Exception("You must be in game");
         }
     }
 
