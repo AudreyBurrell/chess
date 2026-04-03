@@ -28,7 +28,15 @@ public class WebSocketFacade extends Endpoint {
             this.session.addMessageHandler(new MessageHandler.Whole<String>() {
                 @Override
                 public void onMessage(String message) {
-                    ServerMessage notification = new Gson().fromJson(message, ServerMessage.class);
+                    ServerMessage messageInfo = new Gson().fromJson(message, ServerMessage.class);
+                    ServerMessage notification;
+                    if (messageInfo.getServerMessageType() == ServerMessage.ServerMessageType.LOAD_GAME) {
+                        notification = new Gson().fromJson(message, websocket.messages.LoadGameMessage.class);
+                    } else if (messageInfo.getServerMessageType() == ServerMessage.ServerMessageType.ERROR) {
+                        notification = new Gson().fromJson(message, websocket.messages.ErrorMessage.class);
+                    } else {
+                        notification = new Gson().fromJson(message, websocket.messages.NotificationMessage.class);
+                    }
                     notificationHandler.notify(notification);
                 }
             });
@@ -54,6 +62,8 @@ public class WebSocketFacade extends Endpoint {
         var command = new UserGameCommand(UserGameCommand.CommandType.RESIGN, authToken, gameID);
         session.getBasicRemote().sendText(new Gson().toJson(command));
     }
+
+
 
     //DON'T DELETE THIS
     @Override

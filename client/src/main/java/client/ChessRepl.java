@@ -7,6 +7,8 @@ import model.*;
 import chess.ChessGame;
 import client.websocket.NotificationHandler;
 import client.websocket.WebSocketFacade;
+import websocket.messages.NotificationMessage;
+import websocket.messages.ServerMessage;
 
 import static ui.EscapeSequences.*;
 
@@ -15,9 +17,14 @@ public class ChessRepl implements client.websocket.NotificationHandler {
     private final ServerFacade serverFacade;
     private State state = State.SIGNEDOUT;
     private client.websocket.WebSocketFacade ws;
+    private ChessGame currentGame; //used for redrawing the game
+    private String currentPlayerColor; //stores the user's player color
+    private String currentUsername;
+    private String currentGameRole = "";
 
-    public ChessRepl(int port) {
+    public ChessRepl(int port) throws Exception {
         serverFacade = new ServerFacade(port);
+        ws = new WebSocketFacade("http://localhost:8080", this);
     }
     public void run() {
         System.out.println("Welcome to Chess.");
@@ -59,6 +66,7 @@ public class ChessRepl implements client.websocket.NotificationHandler {
                 case "join" -> joinGame(params);
                 case "observe" -> observeGame(params);
                 case "quit" -> quit();
+                //need to add cases for move, highlight, redraw, leave, resign, help---------------------------------
                 default -> help();
             };
         } catch (Exception e) {
@@ -77,6 +85,7 @@ public class ChessRepl implements client.websocket.NotificationHandler {
         AuthData auth = serverFacade.register(username, password, email);
         authToken = auth.authToken();
         state = State.SIGNEDIN;
+        currentUsername = username;
         return "Welcome " + username + ". Type 'help' to view commands \n";
     }
     public String login(String... params) throws Exception {
@@ -88,11 +97,13 @@ public class ChessRepl implements client.websocket.NotificationHandler {
         AuthData auth = serverFacade.login(username, password);
         authToken = auth.authToken();
         state = State.SIGNEDIN;
+        currentUsername = username;
         return "Welcome " + username + ". Type 'help' to view commands \n";
     }
     public String logout() throws Exception {
         assertSignedIn();
         serverFacade.logout(authToken);
+        currentUsername = "";
         state = State.SIGNEDOUT;
         return "You have logged out.";
     }
@@ -202,10 +213,14 @@ public class ChessRepl implements client.websocket.NotificationHandler {
         }
         GameData selectedGame = gamesList.get(gameNumber - 1);
         serverFacade.joinGame(authToken, selectedGame.gameID(), playerColor);
-        ws = new client.websocket.WebSocketFacade("http://localhost:8080", this);
+        //ws = new client.websocket.WebSocketFacade("http://localhost:8080", this);
         ws.connect(authToken, selectedGame.gameID());
-        //drawing the board
-        drawBoard(selectedGame.game(), playerColor);
+        //drawing the board (actually going to be handled by the notify)
+        currentGame = selectedGame.game();
+        currentPlayerColor = playerColor;
+        currentGameRole = "player";
+        //updating the user's state to 'INGAME'
+        state = State.INGAME;
         return "\n Joined game " + selectedGame.gameName() + " as " + playerColor;
     }
     public String observeGame(String... params) throws Exception {
@@ -219,8 +234,9 @@ public class ChessRepl implements client.websocket.NotificationHandler {
             return "Game at index " + gameNumber + " does not exist.";
         }
         GameData selectedGame = gamesList.get(gameNumber - 1);
-        ws = new client.websocket.WebSocketFacade("http://localhost:8080", this);
+        //ws = new client.websocket.WebSocketFacade("http://localhost:8080", this);
         ws.connect(authToken, selectedGame.gameID());
+        currentGameRole = "observer";
         //drawing the board
         drawBoard(selectedGame.game(), "WHITE");
         return "\n Observing game " + selectedGame.gameName();
@@ -237,7 +253,7 @@ public class ChessRepl implements client.websocket.NotificationHandler {
                     quit - stop playing chess
                     help - display possible commands
                     """;
-        } else {
+        } else if (state == State.SIGNEDIN) {
             return """
                     create <GAME NAME> - create a game with name
                     list - list all games
@@ -245,6 +261,15 @@ public class ChessRepl implements client.websocket.NotificationHandler {
                     observe <ID> - observe a game
                     logout - exit account
                     quit - stop playing chess
+                    help - display possible commands
+                    """;
+        } else {
+            return """
+                    move <PIECE> <SQUARE> - moves a speciifc piece to a place on the baord if valid
+                    highlight <PIECE> - highlights the legal moves of piece
+                    redraw - redraws the board
+                    leave - exit the game
+                    resign - forefit the game
                     help - display possible commands
                     """;
         }
@@ -257,7 +282,22 @@ public class ChessRepl implements client.websocket.NotificationHandler {
 
     @Override
     public void notify(websocket.messages.ServerMessage notification) {
-        System.out.println(SET_TEXT_COLOR_RED + notification.getServerMessageType());
+        if (notification.getServerMessageType() == ServerMessage.ServerMessageType.LOAD_GAME) {
+            //reprint the board
+            websocket.messages.LoadGameMessage loadGameMessage = (websocket.messages.LoadGameMessage) notification;
+            currentGame = loadGameMessage.getGameNotification();
+            System.out.println("\n");
+            drawBoard(currentGame, currentPlayerColor);
+        } else if (notification.getServerMessageType() == ServerMessage.ServerMessageType.NOTIFICATION) {
+            //display notification
+            websocket.messages.NotificationMessage notificationMessage = (websocket.messages.NotificationMessage) notification;
+            System.out.println(SET_TEXT_COLOR_RED + notificationMessage.getNotification());
+        } else if (notification.getServerMessageType() == ServerMessage.ServerMessageType.ERROR) {
+            //display the error
+            websocket.messages.ErrorMessage errorMessage = (websocket.messages.ErrorMessage) notification;
+            System.out.println(SET_TEXT_COLOR_RED + errorMessage.getErrorMessage());
+        }
         printPrompt();
     }
+
 }
