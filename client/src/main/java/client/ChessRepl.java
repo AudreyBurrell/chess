@@ -67,6 +67,7 @@ public class ChessRepl implements client.websocket.NotificationHandler {
                 case "observe" -> observeGame(params);
                 case "quit" -> quit();
                 //need to add cases for move, highlight, redraw, leave, resign, help---------------------------------
+                case "move" -> makeMove(params);
                 case "redraw" -> redraw();
                 case "leave" -> leave();
                 case "resign" -> resign();
@@ -268,10 +269,56 @@ public class ChessRepl implements client.websocket.NotificationHandler {
     public String resign() throws Exception {
         assertPlayer();
         ws.resign(authToken, currentGameID);
-//        state = State.SIGNEDIN;
-//        currentGame = null;
-//        currentPlayerColor = null;
         return "Resigning game...";
+    }
+
+    private chess.ChessPosition getChessLocation(String square) {
+        char[] colLetters = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'};
+        int col = 0;
+        for (int i = 0; i < colLetters.length; i++) {
+            if (colLetters[i] == Character.toLowerCase(square.charAt(0))) {
+                col = i;
+                break;
+            }
+        }
+        int row = Character.getNumericValue(square.charAt(1)); //the number represents the row
+        chess.ChessPosition position = new chess.ChessPosition(row, col);
+        return position;
+    }
+    private boolean checkSquare(String square) {
+        if (square.length() != 2) {
+            return false;
+        }
+        char letter = Character.toLowerCase(square.charAt(0));
+        char number = square.charAt(1);
+        char[] validCols = {'a','b','c','d','e','f','g','h'};
+        char[] validRows = {'1','2','3','4','5','6','7','8'};
+        boolean validLetter = false;
+        for (char c : validCols) {
+            if (c == letter) {
+                validLetter = true;
+                break;
+            }
+        }
+        boolean validNumber = false;
+        for (char n : validRows) {
+            if (n == number) {
+                validNumber = true;
+                break;
+            }
+        }
+        return validLetter && validNumber;
+    }
+    public String makeMove(String... params) throws Exception {
+        assertPlayer();
+        if (params.length != 2) {
+            return "Expected: <START LOCATION> <END LOCATION>";
+        }
+        if (!checkSquare(params[0]) || !checkSquare(params[1])) {
+            return "Expected: letter representing the column followed by the number representing the row. Example: a3";
+        }
+        chess.ChessPosition startPosition = getChessLocation(params[0]);
+        chess.ChessPosition endPosition = getChessLocation(params[1]);
     }
 
     public String help() {
@@ -294,7 +341,7 @@ public class ChessRepl implements client.websocket.NotificationHandler {
                     """;
         } else {
             return """
-                    move <PIECE> <SQUARE> - moves a speciifc piece to a place on the baord if valid
+                    move <START LOCATION> <END LOCATION> - moves the piece at start location to end location
                     highlight <PIECE> - highlights the legal moves of piece
                     redraw - redraws the board
                     leave - exit the game
