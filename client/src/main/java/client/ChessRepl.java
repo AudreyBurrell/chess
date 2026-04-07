@@ -68,8 +68,8 @@ public class ChessRepl implements client.websocket.NotificationHandler {
                 case "join" -> joinGame(params);
                 case "observe" -> observeGame(params);
                 case "quit" -> quit();
-                //need to add cases for move, highlight, redraw, leave, resign, help---------------------------------
                 case "move" -> makeMove(params);
+                case "highlight" -> highlight(params);
                 case "redraw" -> redraw();
                 case "leave" -> leave();
                 case "resign" -> resign();
@@ -353,6 +353,25 @@ public class ChessRepl implements client.websocket.NotificationHandler {
         return "";
     }
 
+    public String highlight(String... params) throws Exception {
+        assertPlayer();
+        if (params.length != 1) {
+            return "Expected: <LOCATION>";
+        }
+        if (!checkSquare(params[0])) {
+            return "Expected: letter representing the column followed by the number representing the row. Example: a3";
+        }
+        ChessPosition position = getChessLocation(params[0]);
+        ChessPiece piece = currentGame.getBoard().getPiece(position);
+        if (piece == null) {
+            return "No piece at location " + params[0];
+        }
+        Collection<ChessMove> validMoves = currentGame.validMoves(position);
+        if (validMoves == null || validMoves.isEmpty()) {
+            return "No valid moves for this piece.";
+        }
+    }
+
     public String help() {
         if(state == State.SIGNEDOUT) {
             return """
@@ -374,7 +393,7 @@ public class ChessRepl implements client.websocket.NotificationHandler {
         } else {
             return """
                     move <START LOCATION> <END LOCATION> - moves the piece at start location to end location
-                    highlight <PIECE> - highlights the legal moves of piece
+                    highlight <LOCATION> - highlights the legal moves of piece at location
                     redraw - redraws the board
                     leave - exit the game
                     resign - forefit the game
