@@ -274,8 +274,6 @@ public class ChessRepl implements client.websocket.NotificationHandler {
         currentPlayerColor = "white";
         currentGameID = selectedGame.gameID();
         state = State.OBSERVER;
-        //drawing the board
-        drawBoard(selectedGame.game(), "WHITE", null, null);
         return "\n Observing game " + selectedGame.gameName();
     }
     public String quit() {
