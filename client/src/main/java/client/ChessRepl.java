@@ -1,10 +1,12 @@
 package client;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Scanner;
+
+import chess.*;
 import model.*;
-import chess.ChessGame;
 import client.websocket.NotificationHandler;
 import client.websocket.WebSocketFacade;
 import websocket.messages.NotificationMessage;
@@ -174,13 +176,13 @@ public class ChessRepl implements client.websocket.NotificationHandler {
         }
         System.out.print(RESET_BG_COLOR + SET_TEXT_COLOR_WHITE + colLabels);
     }
-    private String placePieces (chess.ChessBoard board, int row, int col) {
-        var piece = board.getPiece(new chess.ChessPosition(row, col));
+    private String placePieces (ChessBoard board, int row, int col) {
+        var piece = board.getPiece(new ChessPosition(row, col));
         if (piece == null) {
             return "     ";
         }
         String color;
-        boolean isWhite = piece.getTeamColor() == chess.ChessGame.TeamColor.WHITE;
+        boolean isWhite = piece.getTeamColor() == ChessGame.TeamColor.WHITE;
         if(isWhite) {
             color = SET_TEXT_BOLD + SET_TEXT_COLOR_GREEN;
         } else {
@@ -272,7 +274,7 @@ public class ChessRepl implements client.websocket.NotificationHandler {
         return "Resigning game...";
     }
 
-    private chess.ChessPosition getChessLocation(String square) {
+    private ChessPosition getChessLocation(String square) {
         char[] colLetters = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'};
         int col = 0;
         for (int i = 0; i < colLetters.length; i++) {
@@ -282,7 +284,7 @@ public class ChessRepl implements client.websocket.NotificationHandler {
             }
         }
         int row = Character.getNumericValue(square.charAt(1)); //the number represents the row
-        chess.ChessPosition position = new chess.ChessPosition(row, col);
+        ChessPosition position = new ChessPosition(row, col);
         return position;
     }
     private boolean checkSquare(String square) {
@@ -317,8 +319,28 @@ public class ChessRepl implements client.websocket.NotificationHandler {
         if (!checkSquare(params[0]) || !checkSquare(params[1])) {
             return "Expected: letter representing the column followed by the number representing the row. Example: a3";
         }
-        chess.ChessPosition startPosition = getChessLocation(params[0]);
-        chess.ChessPosition endPosition = getChessLocation(params[1]);
+        ChessPosition startPosition = getChessLocation(params[0]);
+        ChessPosition endPosition = getChessLocation(params[1]);
+        //check if it is a valid move here (can probably use a function sharing with highlight) ----------------------------------------------------
+        ChessPiece piece = currentGame.getBoard().getPiece(startPosition);
+        if (piece == null) {
+            return "No piece at location " + params[0];
+        }
+        Collection<ChessMove> validMoves = currentGame.validMoves(startPosition);
+        if (validMoves == null || validMoves.isEmpty()) {
+            return "No valid moves for this piece.";
+        }
+        boolean containsEndPosition = false;
+        for (ChessMove move : validMoves) {
+            if (move.getEndPosition().equals(endPosition)) {
+                containsEndPosition = true;
+                break;
+            }
+        }
+        if (!containsEndPosition) {
+            return "End position is not a valid move.";
+        }
+        //now the actual movement logic (remember to do promotion piece)
     }
 
     public String help() {
@@ -353,11 +375,6 @@ public class ChessRepl implements client.websocket.NotificationHandler {
     private void assertSignedIn() throws Exception {
         if (state == State.SIGNEDOUT) {
             throw new Exception("You must sign in");
-        }
-    }
-    private void assertInGame() throws Exception {
-        if (state == State.SIGNEDIN || state == State.SIGNEDOUT || state == State.OBSERVER) {
-            throw new Exception("You must be a player in a game");
         }
     }
     private void assertPlayer() throws Exception {
