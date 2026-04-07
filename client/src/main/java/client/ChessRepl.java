@@ -256,7 +256,7 @@ public class ChessRepl implements client.websocket.NotificationHandler {
     public String redraw() throws Exception {
         assertPlayer();
         drawBoard(currentGame, currentPlayerColor);
-        return "\n Board redrawn";
+        return "\n";
     }
 
     public String leave() throws Exception {
@@ -279,7 +279,7 @@ public class ChessRepl implements client.websocket.NotificationHandler {
         int col = 0;
         for (int i = 0; i < colLetters.length; i++) {
             if (colLetters[i] == Character.toLowerCase(square.charAt(0))) {
-                col = i;
+                col = i + 1;
                 break;
             }
         }
@@ -321,7 +321,6 @@ public class ChessRepl implements client.websocket.NotificationHandler {
         }
         ChessPosition startPosition = getChessLocation(params[0]);
         ChessPosition endPosition = getChessLocation(params[1]);
-        //check if it is a valid move here (can probably use a function sharing with highlight) ----------------------------------------------------
         ChessPiece piece = currentGame.getBoard().getPiece(startPosition);
         if (piece == null) {
             return "No piece at location " + params[0];
@@ -340,7 +339,18 @@ public class ChessRepl implements client.websocket.NotificationHandler {
         if (!containsEndPosition) {
             return "End position is not a valid move.";
         }
-        //now the actual movement logic (remember to do promotion piece)
+        //now the actual movement logic
+        ChessPiece.PieceType promotionPiece = null;
+        if ((piece.getTeamColor() == ChessGame.TeamColor.WHITE && endPosition.getRow() == 8) ||
+                (piece.getTeamColor() == ChessGame.TeamColor.BLACK && endPosition.getRow() == 1)) {
+            System.out.print("The piece is eligible for promotion. Promote to <QUEEN> <ROOK> <BISHOP> or <KNIGHT>:");
+            Scanner scanner = new Scanner(System.in);
+            String input = scanner.nextLine().toUpperCase();
+            promotionPiece = ChessPiece.PieceType.valueOf(input);
+        }
+        ChessMove move = new ChessMove(startPosition, endPosition, promotionPiece);
+        ws.makeMove(authToken, currentGameID, move);
+        return "";
     }
 
     public String help() {

@@ -1,8 +1,6 @@
 package server.websocket;
 
-import chess.ChessGame;
-import chess.ChessMove;
-import chess.InvalidMoveException;
+import chess.*;
 import com.google.gson.Gson;
 import io.javalin.Javalin;
 import io.javalin.websocket.*;
@@ -96,6 +94,13 @@ public class ChessWebsocketHandler implements WsConnectHandler, WsMessageHandler
         }
     }
 
+    private String getSquareString(ChessPosition position) {
+        char[] colLetters = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'};
+        char col = colLetters[position.getColumn() - 1];
+        int row = position.getRow();
+        return "" + col + row;
+    }
+
     private void makeMove(WsMessageContext ctx, UserGameCommand command) {
         try {
             ValidatedData data = validate(ctx, command);
@@ -124,7 +129,8 @@ public class ChessWebsocketHandler implements WsConnectHandler, WsMessageHandler
                     gameData.blackUsername(), gameData.gameName(), chessGame);
             dataAccess.updateGame(updatedGame);
             connections.broadcast(gameID, null, new LoadGameMessage(chessGame));
-            String notification = auth.username() + " moved " + move.toString();
+            String notification = auth.username() + " moved from " + getSquareString(move.getStartPosition())
+                    + " to " + getSquareString(move.getEndPosition());
             connections.broadcast(gameID, ctx.session, new NotificationMessage(notification));
             ChessGame.TeamColor opponentColor = chessGame.getTeamTurn();
             if (chessGame.isInCheckmate(opponentColor)) {
@@ -135,7 +141,7 @@ public class ChessWebsocketHandler implements WsConnectHandler, WsMessageHandler
             } else if (chessGame.isInCheck(opponentColor)) {
                 connections.broadcast(gameID, null, new NotificationMessage(opponentColor + " is in check"));
             }
-        } catch (chess.InvalidMoveException e) {
+        } catch (InvalidMoveException e) {
             ctx.send(new Gson().toJson(new ErrorMessage("Error: invalid move " + e.getMessage())));
         } catch (Exception e) {
             ctx.send(new Gson().toJson(new ErrorMessage("Error: " + e.getMessage())));
