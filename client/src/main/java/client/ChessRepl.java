@@ -136,7 +136,7 @@ public class ChessRepl implements client.websocket.NotificationHandler {
         }
         return "Here are the games: \n" + result;
     }
-    private void drawBoard(ChessGame game, String playerColor) {
+    private void drawBoard(ChessGame game, String playerColor, ChessPosition highlightedPiecePosition) {
         var board = game.getBoard();
         boolean whitePerspective = !playerColor.equals("BLACK");
         String colLabels;
@@ -165,17 +165,23 @@ public class ChessRepl implements client.websocket.NotificationHandler {
         }
         System.out.print(RESET_BG_COLOR + SET_TEXT_COLOR_WHITE + colLabels);
         System.out.println();
+        String squareColor;
         for(int row = startRow; whitePerspective ? row >= endRow : row <= endRow; row += rowStep) {
             System.out.print(RESET_BG_COLOR + SET_TEXT_COLOR_WHITE + " " + row + " ");
             for(int col = startCol; whitePerspective ? col <= endCol : col >= endCol; col += colStep) {
-                boolean placeLightSquare = (row + col) % 2 != 0;
-                String squareColor;
-                if (placeLightSquare) {
-                    squareColor = SET_BG_COLOR_LIGHT_GREY;
+                //check if it is highlighted select square, else do this other stuff
+                ChessPosition testPosition = new ChessPosition(row, col);
+                if (testPosition.equals(highlightedPiecePosition)) {
+                    squareColor = SET_BG_COLOR_MAGENTA;
                 } else {
-                    squareColor = SET_BG_COLOR_DARK_GREY;
+                    boolean placeLightSquare = (row + col) % 2 != 0;
+                    if (placeLightSquare) {
+                        squareColor = SET_BG_COLOR_LIGHT_GREY;
+                    } else {
+                        squareColor = SET_BG_COLOR_DARK_GREY;
+                    }
                 }
-                System.out.print(squareColor + " " + placePieces(board, row, col));
+                System.out.print(squareColor + " " + placePieces(board, row, col, highlightedPiecePosition));
             }
             System.out.println(RESET_BG_COLOR + SET_TEXT_COLOR_WHITE + " " + row + " ");
         }
@@ -183,21 +189,23 @@ public class ChessRepl implements client.websocket.NotificationHandler {
         //add a fourth parameter to represent the current piece so it can be highlighted in a different color
         //steps:
         //for each ChessPosition in the list represented by the third parameter
-            //change the background color
-            //if a piece is located there, change the text of that square to be black
-        //change the background color/text color of the piece located at the fourth parameter.
+        //change the background color
+        //change the background color/text color of the piece located at the fourth parameter. (I a thinking magenta)
 
 
         System.out.print(RESET_BG_COLOR + SET_TEXT_COLOR_WHITE + colLabels);
     }
-    private String placePieces (ChessBoard board, int row, int col) {
+    private String placePieces (ChessBoard board, int row, int col, ChessPosition highlightedPiecePosition) {
+        //CHANGE THE TEXT COLOR OF POTENTIAL HIGHLIGHTED ITEMS HERE
         var piece = board.getPiece(new ChessPosition(row, col));
         if (piece == null) {
             return "     ";
         }
         String color;
         boolean isWhite = piece.getTeamColor() == ChessGame.TeamColor.WHITE;
-        if(isWhite) {
+        if (highlightedPiecePosition != null && row == highlightedPiecePosition.getRow() && col == highlightedPiecePosition.getColumn()) {
+            color = SET_TEXT_BOLD + SET_TEXT_COLOR_BLACK;
+        } else if(isWhite) {
             color = SET_TEXT_BOLD + SET_TEXT_COLOR_GREEN;
         } else {
             color = SET_TEXT_BOLD + SET_TEXT_COLOR_YELLOW;
@@ -233,7 +241,6 @@ public class ChessRepl implements client.websocket.NotificationHandler {
         }
         GameData selectedGame = gamesList.get(gameNumber - 1);
         serverFacade.joinGame(authToken, selectedGame.gameID(), playerColor);
-        //ws = new client.websocket.WebSocketFacade("http://localhost:8080", this);
         ws.connect(authToken, selectedGame.gameID());
         //drawing the board (actually going to be handled by the notify)
         currentGame = selectedGame.game();
@@ -259,7 +266,7 @@ public class ChessRepl implements client.websocket.NotificationHandler {
         currentGameID = selectedGame.gameID();
         state = State.OBSERVER;
         //drawing the board
-        drawBoard(selectedGame.game(), "WHITE");
+        drawBoard(selectedGame.game(), "WHITE", null);
         return "\n Observing game " + selectedGame.gameName();
     }
     public String quit() {
@@ -268,7 +275,7 @@ public class ChessRepl implements client.websocket.NotificationHandler {
 
     public String redraw() throws Exception {
         assertPlayer();
-        drawBoard(currentGame, currentPlayerColor);
+        drawBoard(currentGame, currentPlayerColor, null);
         return "\n";
     }
 
@@ -374,16 +381,17 @@ public class ChessRepl implements client.websocket.NotificationHandler {
         if (!checkSquare(params[0])) {
             return "Expected: letter representing the column followed by the number representing the row. Example: a3";
         }
-        ChessPosition position = getChessLocation(params[0]);
-        ChessPiece piece = currentGame.getBoard().getPiece(position);
+        ChessPosition piecePosition = getChessLocation(params[0]);
+        ChessPiece piece = currentGame.getBoard().getPiece(piecePosition);
         if (piece == null) {
             return "No piece at location " + params[0];
         }
-        Collection<ChessMove> validMoves = currentGame.validMoves(position);
+        Collection<ChessMove> validMoves = currentGame.validMoves(piecePosition);
         if (validMoves == null || validMoves.isEmpty()) {
             return "No valid moves for this piece.";
         }
         //redraw the board (but don't send it to both users), with the validMoves and position highlighted too
+        drawBoard(currentGame, currentPlayerColor, piecePosition);
         return "";
     }
 
@@ -439,7 +447,7 @@ public class ChessRepl implements client.websocket.NotificationHandler {
             websocket.messages.LoadGameMessage loadGameMessage = (websocket.messages.LoadGameMessage) notification;
             currentGame = loadGameMessage.getGameNotification();
             System.out.println("\n");
-            drawBoard(currentGame, currentPlayerColor);
+            drawBoard(currentGame, currentPlayerColor, null);
         } else if (notification.getServerMessageType() == ServerMessage.ServerMessageType.NOTIFICATION) {
             //display notification
             websocket.messages.NotificationMessage notificationMessage = (websocket.messages.NotificationMessage) notification;
