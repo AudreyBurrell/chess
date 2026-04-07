@@ -169,11 +169,25 @@ public class ChessRepl implements client.websocket.NotificationHandler {
             System.out.print(RESET_BG_COLOR + SET_TEXT_COLOR_WHITE + " " + row + " ");
             for(int col = startCol; whitePerspective ? col <= endCol : col >= endCol; col += colStep) {
                 boolean placeLightSquare = (row + col) % 2 != 0;
-                String squareColor = placeLightSquare ? SET_BG_COLOR_LIGHT_GREY : SET_BG_COLOR_DARK_GREY;
+                String squareColor;
+                if (placeLightSquare) {
+                    squareColor = SET_BG_COLOR_LIGHT_GREY;
+                } else {
+                    squareColor = SET_BG_COLOR_DARK_GREY;
+                }
                 System.out.print(squareColor + " " + placePieces(board, row, col));
             }
             System.out.println(RESET_BG_COLOR + SET_TEXT_COLOR_WHITE + " " + row + " ");
         }
+        //if the highlighted squares is not null (make a third parameter), refill those with a different color (I am thinking blue)-----------------------
+        //add a fourth parameter to represent the current piece so it can be highlighted in a different color
+        //steps:
+        //for each ChessPosition in the list represented by the third parameter
+            //change the background color
+            //if a piece is located there, change the text of that square to be black
+        //change the background color/text color of the piece located at the fourth parameter.
+
+
         System.out.print(RESET_BG_COLOR + SET_TEXT_COLOR_WHITE + colLabels);
     }
     private String placePieces (ChessBoard board, int row, int col) {
@@ -240,7 +254,6 @@ public class ChessRepl implements client.websocket.NotificationHandler {
             return "Game at index " + gameNumber + " does not exist.";
         }
         GameData selectedGame = gamesList.get(gameNumber - 1);
-        //ws = new client.websocket.WebSocketFacade("http://localhost:8080", this);
         ws.connect(authToken, selectedGame.gameID());
         currentPlayerColor = "white";
         currentGameID = selectedGame.gameID();
@@ -370,6 +383,8 @@ public class ChessRepl implements client.websocket.NotificationHandler {
         if (validMoves == null || validMoves.isEmpty()) {
             return "No valid moves for this piece.";
         }
+        //redraw the board (but don't send it to both users), with the validMoves and position highlighted too
+        return "";
     }
 
     public String help() {
