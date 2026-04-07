@@ -86,7 +86,7 @@ public class ChessWebsocketHandler implements WsConnectHandler, WsMessageHandler
             } else if (username.equals(gameData.blackUsername())) {
                 notification = username + " joined game as BLACK";
             } else {
-                notification = username = " is observing the game";
+                notification = username + " is observing the game";
             }
             connections.broadcast(gameID, ctx.session, new NotificationMessage(notification));
         } catch (Exception e) {
