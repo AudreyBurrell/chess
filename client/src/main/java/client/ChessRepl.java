@@ -136,7 +136,7 @@ public class ChessRepl implements client.websocket.NotificationHandler {
         }
         return "Here are the games: \n" + result;
     }
-    private void drawBoard(ChessGame game, String playerColor, ChessPosition highlightedPiecePosition) {
+    private void drawBoard(ChessGame game, String playerColor, ChessPosition highlightedPiecePosition, Collection<ChessMove> validHighlightedMoves) {
         var board = game.getBoard();
         boolean whitePerspective = !playerColor.equals("BLACK");
         String colLabels;
@@ -173,6 +173,8 @@ public class ChessRepl implements client.websocket.NotificationHandler {
                 ChessPosition testPosition = new ChessPosition(row, col);
                 if (testPosition.equals(highlightedPiecePosition)) {
                     squareColor = SET_BG_COLOR_MAGENTA;
+                } else if (validHighlightedMoves != null && checkHighlightSquare(validHighlightedMoves, testPosition)) {
+                    squareColor = SET_BG_COLOR_BLUE;
                 } else {
                     boolean placeLightSquare = (row + col) % 2 != 0;
                     if (placeLightSquare) {
@@ -181,21 +183,13 @@ public class ChessRepl implements client.websocket.NotificationHandler {
                         squareColor = SET_BG_COLOR_DARK_GREY;
                     }
                 }
-                System.out.print(squareColor + " " + placePieces(board, row, col, highlightedPiecePosition));
+                System.out.print(squareColor + " " + placePieces(board, row, col, highlightedPiecePosition, validHighlightedMoves));
             }
             System.out.println(RESET_BG_COLOR + SET_TEXT_COLOR_WHITE + " " + row + " ");
         }
-        //if the highlighted squares is not null (make a third parameter), refill those with a different color (I am thinking blue)-----------------------
-        //add a fourth parameter to represent the current piece so it can be highlighted in a different color
-        //steps:
-        //for each ChessPosition in the list represented by the third parameter
-        //change the background color
-        //change the background color/text color of the piece located at the fourth parameter. (I a thinking magenta)
-
-
         System.out.print(RESET_BG_COLOR + SET_TEXT_COLOR_WHITE + colLabels);
     }
-    private String placePieces (ChessBoard board, int row, int col, ChessPosition highlightedPiecePosition) {
+    private String placePieces (ChessBoard board, int row, int col, ChessPosition highlightedPiecePosition, Collection<ChessMove> validHighlightedMoves) {
         //CHANGE THE TEXT COLOR OF POTENTIAL HIGHLIGHTED ITEMS HERE
         var piece = board.getPiece(new ChessPosition(row, col));
         if (piece == null) {
@@ -203,7 +197,12 @@ public class ChessRepl implements client.websocket.NotificationHandler {
         }
         String color;
         boolean isWhite = piece.getTeamColor() == ChessGame.TeamColor.WHITE;
-        if (highlightedPiecePosition != null && row == highlightedPiecePosition.getRow() && col == highlightedPiecePosition.getColumn()) {
+        boolean highlightSquare = false;
+        if (validHighlightedMoves != null) {
+            highlightSquare = checkHighlightSquare(validHighlightedMoves, new ChessPosition(row, col));
+        }
+        if ((highlightedPiecePosition != null && row == highlightedPiecePosition.getRow() &&
+                col == highlightedPiecePosition.getColumn()) || highlightSquare) {
             color = SET_TEXT_BOLD + SET_TEXT_COLOR_BLACK;
         } else if(isWhite) {
             color = SET_TEXT_BOLD + SET_TEXT_COLOR_GREEN;
@@ -218,8 +217,18 @@ public class ChessRepl implements client.websocket.NotificationHandler {
             case ROOK -> "  R  ";
             case PAWN -> "  P  ";
         };
-
     }
+
+    private boolean checkHighlightSquare(Collection<ChessMove> validMoves, ChessPosition position) {
+        for (ChessMove move : validMoves) {
+            ChessPosition endPosition = move.getEndPosition();
+            if (endPosition.getRow() == position.getRow() && endPosition.getColumn() == position.getColumn()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public String joinGame(String... params) throws Exception {
         assertSignedIn();
         if (params.length != 2) {
@@ -266,7 +275,7 @@ public class ChessRepl implements client.websocket.NotificationHandler {
         currentGameID = selectedGame.gameID();
         state = State.OBSERVER;
         //drawing the board
-        drawBoard(selectedGame.game(), "WHITE", null);
+        drawBoard(selectedGame.game(), "WHITE", null, null);
         return "\n Observing game " + selectedGame.gameName();
     }
     public String quit() {
@@ -275,7 +284,7 @@ public class ChessRepl implements client.websocket.NotificationHandler {
 
     public String redraw() throws Exception {
         assertPlayer();
-        drawBoard(currentGame, currentPlayerColor, null);
+        drawBoard(currentGame, currentPlayerColor, null, null);
         return "\n";
     }
 
@@ -391,7 +400,7 @@ public class ChessRepl implements client.websocket.NotificationHandler {
             return "No valid moves for this piece.";
         }
         //redraw the board (but don't send it to both users), with the validMoves and position highlighted too
-        drawBoard(currentGame, currentPlayerColor, piecePosition);
+        drawBoard(currentGame, currentPlayerColor, piecePosition, validMoves);
         return "";
     }
 
@@ -447,7 +456,7 @@ public class ChessRepl implements client.websocket.NotificationHandler {
             websocket.messages.LoadGameMessage loadGameMessage = (websocket.messages.LoadGameMessage) notification;
             currentGame = loadGameMessage.getGameNotification();
             System.out.println("\n");
-            drawBoard(currentGame, currentPlayerColor, null);
+            drawBoard(currentGame, currentPlayerColor, null, null);
         } else if (notification.getServerMessageType() == ServerMessage.ServerMessageType.NOTIFICATION) {
             //display notification
             websocket.messages.NotificationMessage notificationMessage = (websocket.messages.NotificationMessage) notification;
