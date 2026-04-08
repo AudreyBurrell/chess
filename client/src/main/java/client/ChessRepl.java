@@ -277,13 +277,13 @@ public class ChessRepl implements client.websocket.NotificationHandler {
     }
 
     public String redraw() throws Exception {
-        assertPlayer();
+        assertPlayerOrObserver();
         drawBoard(currentGame, currentPlayerColor, null, null);
         return "\n";
     }
 
     public String leave() throws Exception {
-        assertPlayer();
+        assertPlayerOrObserver();
         ws.leave(authToken, currentGameID);
         currentGame = null;
         state = State.SIGNEDIN;
@@ -368,8 +368,6 @@ public class ChessRepl implements client.websocket.NotificationHandler {
                 (piece.getTeamColor() == ChessGame.TeamColor.BLACK && endPosition.getRow() == 1)) {
             System.out.print("The piece is eligible for promotion.");
             Scanner scanner = new Scanner(System.in);
-//            String input = scanner.nextLine().toUpperCase();
-//            String input = determinePieceType(scanner.nextLine());
             promotionPiece = determinePieceType(scanner);
         }
         ChessMove move = new ChessMove(startPosition, endPosition, promotionPiece);
@@ -399,7 +397,7 @@ public class ChessRepl implements client.websocket.NotificationHandler {
     }
 
     public String highlight(String... params) throws Exception {
-        assertPlayer();
+        assertPlayerOrObserver();
         if (params.length != 1) {
             return "Expected: <LOCATION>";
         }
@@ -457,6 +455,11 @@ public class ChessRepl implements client.websocket.NotificationHandler {
     private void assertPlayer() throws Exception {
         if (state != State.INGAME) {
             throw new Exception("You must be a player in a game");
+        }
+    }
+    private void assertPlayerOrObserver() throws Exception {
+        if (state == State.SIGNEDIN || state == State.SIGNEDOUT) {
+            throw new Exception("You must be a player or an observer.");
         }
     }
 
