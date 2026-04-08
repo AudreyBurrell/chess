@@ -298,6 +298,7 @@ public class ChessRepl implements client.websocket.NotificationHandler {
     public String resign() throws Exception {
         assertPlayer();
         ws.resign(authToken, currentGameID);
+        drawBoard(currentGame, currentPlayerColor, null, null);
         return "Resigning game...";
     }
 

@@ -133,13 +133,20 @@ public class ChessWebsocketHandler implements WsConnectHandler, WsMessageHandler
                     + " to " + getSquareString(move.getEndPosition());
             connections.broadcast(gameID, ctx.session, new NotificationMessage(notification));
             ChessGame.TeamColor opponentColor = chessGame.getTeamTurn();
+            //determining the username of the opponent
+            String opponentUsername;
+            if (!username.equals(gameData.whiteUsername())) {
+                opponentUsername = gameData.whiteUsername();
+            } else {
+                opponentUsername = gameData.blackUsername();
+            }
             if (chessGame.isInCheckmate(opponentColor)) {
                 connections.broadcast(gameID, null, new NotificationMessage(auth.username() +
-                        " has put " + opponentColor + " in checkmate!"));
+                        " has put " + opponentUsername + " in checkmate!"));
             } else if (chessGame.isInStalemate(opponentColor)) {
                 connections.broadcast(gameID, null, new NotificationMessage("Stalemate"));
             } else if (chessGame.isInCheck(opponentColor)) {
-                connections.broadcast(gameID, null, new NotificationMessage(opponentColor + " is in check"));
+                connections.broadcast(gameID, null, new NotificationMessage(opponentUsername + " is in check"));
             }
         } catch (InvalidMoveException e) {
             ctx.send(new Gson().toJson(new ErrorMessage("Error: invalid move " + e.getMessage())));
