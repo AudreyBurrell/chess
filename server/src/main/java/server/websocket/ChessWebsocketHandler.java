@@ -2,19 +2,16 @@ package server.websocket;
 
 import chess.*;
 import com.google.gson.Gson;
-import io.javalin.Javalin;
 import io.javalin.websocket.*;
 import model.AuthData;
 import model.GameData;
 import org.jetbrains.annotations.NotNull;
 import service.*;
-import org.eclipse.jetty.websocket.api.Session;
 import websocket.commands.MakeMoveCommand;
 import websocket.commands.UserGameCommand;
 import websocket.messages.ErrorMessage;
 import websocket.messages.LoadGameMessage;
 import websocket.messages.NotificationMessage;
-import websocket.messages.ServerMessage;
 
 import java.io.IOException;
 

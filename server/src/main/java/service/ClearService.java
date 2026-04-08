@@ -2,9 +2,6 @@ package service;
 
 import dataaccess.DataAccess;
 import dataaccess.DataAccessException;
-import model.UserData;
-import model.AuthData;
-import model.GameData;
 
 public class ClearService {
     private final DataAccess dataAccess;

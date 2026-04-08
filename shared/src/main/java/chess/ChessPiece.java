@@ -36,7 +36,6 @@ public class ChessPiece {
      * @return Which team this chess piece belongs to
      */
     public ChessGame.TeamColor getTeamColor() {
-//        throw new RuntimeException("Not implemented");
         return pieceColor;
     }
 
@@ -44,7 +43,6 @@ public class ChessPiece {
      * @return which type of chess piece this piece is
      */
     public PieceType getPieceType() {
-//        throw new RuntimeException("Not implemented");
         return pieceType;
     }
 
@@ -282,7 +280,6 @@ public class ChessPiece {
     }
 
     private Collection<ChessMove> pawnMoves(ChessBoard board, ChessPosition myPosition){
-        //need to add promotion stuff somewhere
         List<ChessMove> pawnMoves = new ArrayList<>();
         int currentRow = myPosition.getRow();
         int currentCol = myPosition.getColumn();
@@ -311,11 +308,9 @@ public class ChessPiece {
     }
     //PUTTING IT TOGETHER
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
-//        throw new RuntimeException("Not implemented");
         List<ChessMove> chessMoves = new ArrayList<>();
         PieceType currentPiece = getPieceType();
         switch(currentPiece){
-            //if it's king, do something. If it's queen, do something else.
             case KING:
                 chessMoves.addAll(kingMoves(board, myPosition));
                 break;

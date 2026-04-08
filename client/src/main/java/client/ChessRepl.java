@@ -74,7 +74,6 @@ public class ChessRepl implements client.websocket.NotificationHandler {
                 default -> help();
             };
         } catch (Exception e) {
-            //System.out.println("DEBUG ERROR: " + e.getClass().getName() + " - " + e.getMessage());
             return e.getMessage();
         }
     }
@@ -190,7 +189,6 @@ public class ChessRepl implements client.websocket.NotificationHandler {
     private String placePieces (ChessBoard board, int row, int col,
                                 ChessPosition highlightedPiecePosition,
                                 Collection<ChessMove> validHighlightedMoves) {
-        //CHANGE THE TEXT COLOR OF POTENTIAL HIGHLIGHTED ITEMS HERE
         var piece = board.getPiece(new ChessPosition(row, col));
         if (piece == null) {
             return "     ";
@@ -251,11 +249,9 @@ public class ChessRepl implements client.websocket.NotificationHandler {
         GameData selectedGame = gamesList.get(gameNumber - 1);
         serverFacade.joinGame(authToken, selectedGame.gameID(), playerColor);
         ws.connect(authToken, selectedGame.gameID());
-        //drawing the board (actually going to be handled by the notify)
         currentGame = selectedGame.game();
         currentPlayerColor = playerColor;
         currentGameID = selectedGame.gameID();
-        //updating the user's state to 'INGAME'
         state = State.INGAME;
         return "\n Joined game " + selectedGame.gameName() + " as " + playerColor;
     }

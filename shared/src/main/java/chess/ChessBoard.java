@@ -1,8 +1,6 @@
 package chess;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Objects;
 
 /**
@@ -24,7 +22,6 @@ public class ChessBoard {
      * @param piece    the piece to add
      */
     public void addPiece(ChessPosition position, ChessPiece piece) {
-//       throw new RuntimeException("Not implemented");
         board[position.getRow()-1][position.getColumn()-1] = piece;
     }
 
@@ -36,7 +33,6 @@ public class ChessBoard {
      * position
      */
     public ChessPiece getPiece(ChessPosition position) {
-//        throw new RuntimeException("Not implemented");
         return board[position.getRow()-1][position.getColumn()-1];
     }
 
@@ -45,10 +41,6 @@ public class ChessBoard {
      * (How the game of chess normally starts)
      */
     public void resetBoard() {
-        //[p][p][p][p][p][p][p][p]
-        //[r][n][b][q][k][b][n][r] (using n for knight, k for king)
-        //Actually I think I need to put the picees where they are supposed to go
-        //ChessPiece[][] board = new ChessPiece[8][8];
         board[0][0] = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.ROOK);
         board[0][1] = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.KNIGHT);
         board[0][2] = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.BISHOP);
@@ -71,10 +63,6 @@ public class ChessBoard {
         for (int col = 0; col < 8; col++) {
             board[6][col] = new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.PAWN);
         }
-
-
-
-//        throw new RuntimeException("Not implemented");
     }
 
     @Override

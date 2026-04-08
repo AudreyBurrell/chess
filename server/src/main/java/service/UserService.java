@@ -4,7 +4,6 @@ import dataaccess.DataAccess;
 import dataaccess.DataAccessException;
 import model.UserData;
 import model.AuthData;
-import model.GameData;
 import org.mindrot.jbcrypt.BCrypt;
 
 public class UserService {

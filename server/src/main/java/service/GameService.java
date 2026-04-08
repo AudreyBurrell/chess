@@ -2,8 +2,6 @@ package service;
 
 import dataaccess.DataAccess;
 import dataaccess.DataAccessException;
-import model.UserData;
-import model.AuthData;
 import model.GameData;
 
 import java.util.ArrayList;
