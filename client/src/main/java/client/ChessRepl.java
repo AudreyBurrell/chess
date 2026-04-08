@@ -292,10 +292,23 @@ public class ChessRepl implements client.websocket.NotificationHandler {
     }
 
     public String resign() throws Exception {
-        assertPlayer();
-        ws.resign(authToken, currentGameID);
-        drawBoard(currentGame, currentPlayerColor, null, null);
-        return "Resigning game...";
+        Scanner scanner = new Scanner(System.in);
+        while (true) {
+            System.out.print("Are you sure you want to resign? <Y> <N>: ");
+            String input = scanner.nextLine().trim().toUpperCase();
+            switch (input) {
+                case "N":
+                    redraw();
+                    return "";
+                case "Y":
+                    assertPlayer();
+                    ws.resign(authToken, currentGameID);
+                    drawBoard(currentGame, currentPlayerColor, null, null);
+                    return "";
+                default:
+                    System.out.println("Invalid input.");
+            }
+        }
     }
 
     private ChessPosition getChessLocation(String square) {
