@@ -366,14 +366,38 @@ public class ChessRepl implements client.websocket.NotificationHandler {
         ChessPiece.PieceType promotionPiece = null;
         if ((piece.getTeamColor() == ChessGame.TeamColor.WHITE && endPosition.getRow() == 8) ||
                 (piece.getTeamColor() == ChessGame.TeamColor.BLACK && endPosition.getRow() == 1)) {
-            System.out.print("The piece is eligible for promotion. Promote to <QUEEN> <ROOK> <BISHOP> or <KNIGHT>:");
+            System.out.print("The piece is eligible for promotion. Promote to <Q>UEEN <R>OOK <B>ISHOP or <K>NIGHT:");
             Scanner scanner = new Scanner(System.in);
-            String input = scanner.nextLine().toUpperCase();
+//            String input = scanner.nextLine().toUpperCase();
+            String input = determinePieceType(scanner.nextLine());
             promotionPiece = ChessPiece.PieceType.valueOf(input);
         }
         ChessMove move = new ChessMove(startPosition, endPosition, promotionPiece);
         ws.makeMove(authToken, currentGameID, move);
         return "";
+    }
+
+    private String determinePieceType(String letterInput) {
+        String letter = letterInput.toUpperCase();
+        String type;
+        switch (letter) {
+            case "Q":
+                type = "QUEEN";
+                break;
+            case "R":
+                type = "ROOK";
+                break;
+            case "B":
+                type = "BISHOP";
+                break;
+            case "K":
+                type = "KNIGHT";
+                break;
+            default:
+                type = "PAWN";
+                break;
+        }
+        return type;
     }
 
     public String highlight(String... params) throws Exception {
