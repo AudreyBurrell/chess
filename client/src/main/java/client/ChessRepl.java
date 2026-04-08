@@ -7,9 +7,7 @@ import java.util.Scanner;
 
 import chess.*;
 import model.*;
-import client.websocket.NotificationHandler;
 import client.websocket.WebSocketFacade;
-import websocket.messages.NotificationMessage;
 import websocket.messages.ServerMessage;
 
 import static ui.EscapeSequences.*;
@@ -189,7 +187,9 @@ public class ChessRepl implements client.websocket.NotificationHandler {
         }
         System.out.print(RESET_BG_COLOR + SET_TEXT_COLOR_WHITE + colLabels);
     }
-    private String placePieces (ChessBoard board, int row, int col, ChessPosition highlightedPiecePosition, Collection<ChessMove> validHighlightedMoves) {
+    private String placePieces (ChessBoard board, int row, int col,
+                                ChessPosition highlightedPiecePosition,
+                                Collection<ChessMove> validHighlightedMoves) {
         //CHANGE THE TEXT COLOR OF POTENTIAL HIGHLIGHTED ITEMS HERE
         var piece = board.getPiece(new ChessPosition(row, col));
         if (piece == null) {
@@ -311,9 +311,8 @@ public class ChessRepl implements client.websocket.NotificationHandler {
                 break;
             }
         }
-        int row = Character.getNumericValue(square.charAt(1)); //the number represents the row
-        ChessPosition position = new ChessPosition(row, col);
-        return position;
+        int row = Character.getNumericValue(square.charAt(1));
+        return new ChessPosition(row, col);
     }
     private boolean checkSquare(String square) {
         if (square.length() != 2) {
@@ -440,11 +439,6 @@ public class ChessRepl implements client.websocket.NotificationHandler {
     private void assertPlayer() throws Exception {
         if (state != State.INGAME) {
             throw new Exception("You must be a player in a game");
-        }
-    }
-    private void assertObserver() throws Exception {
-        if (state != State.OBSERVER) {
-            throw new Exception("You must be an observer");
         }
     }
 
