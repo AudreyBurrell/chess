@@ -366,38 +366,36 @@ public class ChessRepl implements client.websocket.NotificationHandler {
         ChessPiece.PieceType promotionPiece = null;
         if ((piece.getTeamColor() == ChessGame.TeamColor.WHITE && endPosition.getRow() == 8) ||
                 (piece.getTeamColor() == ChessGame.TeamColor.BLACK && endPosition.getRow() == 1)) {
-            System.out.print("The piece is eligible for promotion. Promote to <Q>UEEN <R>OOK <B>ISHOP or <K>NIGHT:");
+            System.out.print("The piece is eligible for promotion.");
             Scanner scanner = new Scanner(System.in);
 //            String input = scanner.nextLine().toUpperCase();
-            String input = determinePieceType(scanner.nextLine());
-            promotionPiece = ChessPiece.PieceType.valueOf(input);
+//            String input = determinePieceType(scanner.nextLine());
+            promotionPiece = determinePieceType(scanner);
         }
         ChessMove move = new ChessMove(startPosition, endPosition, promotionPiece);
         ws.makeMove(authToken, currentGameID, move);
         return "";
     }
 
-    private String determinePieceType(String letterInput) {
-        String letter = letterInput.toUpperCase();
-        String type;
-        switch (letter) {
-            case "Q":
-                type = "QUEEN";
-                break;
-            case "R":
-                type = "ROOK";
-                break;
-            case "B":
-                type = "BISHOP";
-                break;
-            case "K":
-                type = "KNIGHT";
-                break;
-            default:
-                type = "PAWN";
-                break;
+    private ChessPiece.PieceType determinePieceType(Scanner scanner) {
+        while (true) {
+            System.out.print("Promote to <Q>UEEN <R>OOK <B>ISHOP or <K>NIGHT: ");
+            String input = scanner.nextLine().trim().toUpperCase();
+            switch (input) {
+                case "Q":
+                    return ChessPiece.PieceType.QUEEN;
+                case "R":
+                    return ChessPiece.PieceType.ROOK;
+                case "B":
+                    return ChessPiece.PieceType.BISHOP;
+                case "K":
+                    return ChessPiece.PieceType.KNIGHT;
+                default:
+                    System.out.println("Invalid input.");
+
+            }
         }
-        return type;
+
     }
 
     public String highlight(String... params) throws Exception {
